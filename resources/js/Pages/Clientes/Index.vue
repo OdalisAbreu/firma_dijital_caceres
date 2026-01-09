@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -255,13 +256,18 @@ const getNombreCompleto = (cliente) => {
 
                         <div class="mt-4 flex gap-2">
                             <PrimaryButton @click="aplicarFiltros" :disabled="form.processing">
-                                Buscar
+                                <span v-if="form.processing" class="flex items-center gap-2">
+                                    <LoadingSpinner size="sm" color="white" />
+                                    Buscando...
+                                </span>
+                                <span v-else>Buscar</span>
                             </PrimaryButton>
                             <button
                                 @click="limpiarFiltros"
-                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 :disabled="form.processing"
                             >
+                                <LoadingSpinner v-if="form.processing" size="sm" color="gray" />
                                 Limpiar
                             </button>
                         </div>
@@ -270,8 +276,19 @@ const getNombreCompleto = (cliente) => {
 
                 <!-- Tabla -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div v-if="!clientes || !clientes.data || clientes.data.length === 0" class="text-center py-8">
+                    <div class="p-6 relative">
+                        <!-- Loading Overlay -->
+                        <div
+                            v-if="form.processing && (!clientes || !clientes.data || clientes.data.length === 0)"
+                            class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10"
+                        >
+                            <div class="flex flex-col items-center gap-3">
+                                <LoadingSpinner size="lg" color="primary" />
+                                <p class="text-secondary">Cargando clientes...</p>
+                            </div>
+                        </div>
+
+                        <div v-if="!form.processing && (!clientes || !clientes.data || clientes.data.length === 0)" class="text-center py-8">
                             <p class="text-gray-500">No se encontraron clientes con los filtros aplicados.</p>
                         </div>
 
@@ -351,39 +368,55 @@ const getNombreCompleto = (cliente) => {
                         <div v-if="clientes && clientes.data && clientes.data.length > 0" class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                             <div class="flex items-center gap-2">
                                 <label for="page_size" class="text-sm text-secondary">Registros por página:</label>
-                                <select
-                                    id="page_size"
-                                    v-model="form.page_size"
-                                    @change="cambiarPageSize(form.page_size)"
-                                    :disabled="form.processing"
-                                    class="px-6 py-2 border border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <option value="10">10</option>
-                                    <option value="30">30</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
+                                <div class="relative">
+                                    <select
+                                        id="page_size"
+                                        v-model="form.page_size"
+                                        @change="cambiarPageSize(form.page_size)"
+                                        :disabled="form.processing"
+                                        class="px-6 py-2 border border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <option value="10">10</option>
+                                        <option value="30">30</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    <LoadingSpinner
+                                        v-if="form.processing"
+                                        size="sm"
+                                        color="gray"
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                    />
+                                </div>
                             </div>
 
                             <div class="flex items-center gap-2">
                                 <button
                                     @click="cambiarPagina(clientes.current_page - 1)"
                                     :disabled="clientes.current_page <= 1 || form.processing"
-                                    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
+                                    <LoadingSpinner v-if="form.processing && clientes.current_page > 1" size="sm" color="gray" />
                                     Anterior
                                 </button>
                                 
                                 <span class="px-4 py-2 text-sm text-secondary">
-                                    Página {{ clientes.current_page }} de {{ clientes.last_page }}
+                                    <span v-if="form.processing" class="flex items-center gap-2">
+                                        <LoadingSpinner size="sm" color="gray" />
+                                        Cargando...
+                                    </span>
+                                    <span v-else>
+                                        Página {{ clientes.current_page }} de {{ clientes.last_page }}
+                                    </span>
                                 </span>
                                 
                                 <button
                                     @click="cambiarPagina(clientes.current_page + 1)"
                                     :disabled="clientes.current_page >= clientes.last_page || form.processing"
-                                    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     Siguiente
+                                    <LoadingSpinner v-if="form.processing && clientes.current_page < clientes.last_page" size="sm" color="gray" />
                                 </button>
                             </div>
                         </div>

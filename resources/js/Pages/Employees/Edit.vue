@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -136,7 +137,11 @@ const submit = () => {
                                 </Link>
 
                                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                                    Actualizar Empleado
+                                    <span v-if="form.processing" class="flex items-center gap-2">
+                                        <LoadingSpinner size="sm" color="white" />
+                                        Actualizando...
+                                    </span>
+                                    <span v-else>Actualizar Empleado</span>
                                 </PrimaryButton>
                             </div>
                         </form>

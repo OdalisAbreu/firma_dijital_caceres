@@ -1,19 +1,51 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useDarkMode } from '@/composables/useDarkMode';
 
 const showingNavigationDropdown = ref(false);
 const { isDark, toggleDarkMode } = useDarkMode();
+const isLoading = ref(false);
+
+onMounted(() => {
+    router.on('start', () => {
+        isLoading.value = true;
+    });
+
+    router.on('finish', () => {
+        isLoading.value = false;
+    });
+});
 </script>
 
 <template>
     <div>
+        <!-- Loading Overlay Global -->
+        <Transition
+            enter-active-class="transition-opacity duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="isLoading"
+                class="fixed inset-0 bg-white dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 z-50 flex items-center justify-center"
+            >
+                <div class="flex flex-col items-center gap-4">
+                    <LoadingSpinner size="lg" color="primary" />
+                    <p class="text-secondary dark:text-white text-lg font-medium">Cargando...</p>
+                </div>
+            </div>
+        </Transition>
+
         <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
             <nav class="bg-secondary border-b border-secondary-dark">
                 <!-- Primary Navigation Menu -->

@@ -1,6 +1,8 @@
 <script setup>
+import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 defineProps({
@@ -10,9 +12,16 @@ defineProps({
     },
 });
 
+const deletingId = ref(null);
+
 const deleteEmployee = (employeeId) => {
     if (confirm('¿Estás seguro de que deseas eliminar este empleado?')) {
-        router.delete(route('employees.destroy', employeeId));
+        deletingId.value = employeeId;
+        router.delete(route('employees.destroy', employeeId), {
+            onFinish: () => {
+                deletingId.value = null;
+            },
+        });
     }
 };
 </script>
@@ -121,10 +130,12 @@ const deleteEmployee = (employeeId) => {
                                                 </Link>
                                                 <button
                                                     @click="deleteEmployee(employee.id)"
-                                                    class="text-red-600 hover:text-red-800 transition-colors"
+                                                    :disabled="deletingId === employee.id"
+                                                    class="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                     title="Eliminar"
                                                 >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <LoadingSpinner v-if="deletingId === employee.id" size="sm" color="gray" />
+                                                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                 </button>
