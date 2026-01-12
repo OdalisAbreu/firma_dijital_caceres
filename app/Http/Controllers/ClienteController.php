@@ -71,54 +71,116 @@ class ClienteController extends Controller
             'last_page' => $data['total_pages'] ?? 1,
         ];
 
+        // Obtener el empleado principal para el formulario KYC
+        $majorEmployee = Employee::where('major_employee', true)->first();
+        
+        // Obtener todos los empleados para el dropdown
+        $employees = Employee::orderBy('major_employee', 'desc')->orderBy('name')->get();
+
         return Inertia::render('Clientes/Index', [
             'clientes' => $clientes,
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
+            'majorEmployee' => $majorEmployee,
+            'employees' => $employees, // Pasar todos los empleados para el dropdown
         ]);
     }
 
-    public function createKycUsurioUnico(Request $request){
+    public function createKycUsurioUnico(Request $request)
+    {
+        // Validar campos obligatorios
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'name_client' => 'required|string|max:255',
+            'lastname_client' => 'required|string|max:255',
+            'email_client' => 'required|email|max:255',
+            'tipo_tercero' => 'required|in:Tomador,Asegurado,Beneficiario,Afianzado,Proveedor,Empleado,Apoderado',
+            'sucursal' => 'required|in:Principal,Romana,Punta Cana',
+            'tipodeidentificacion' => 'required|string|max:255',
+            'numero_identificacion' => 'required|string|max:255',
+        ]);
 
-        //integrar el servicio de kyc usuario unico
+        // Integrar el servicio de kyc usuario unico
         $kycUsuarioUnicoService = new KycUsuarioUnicoService();
 
-        $employee = Employee::find($request->employee_id);
-        if (!$employee) {
-            return response()->json(['error' => 'Empleado no encontrado'], 404);
-        }
+        $employee = Employee::findOrFail($validated['employee_id']);
+
+        // Preparar todos los datos para el servicio
         $data = [
-            'title' => 'Formulario KYC',
+            'title' => 'Formulario KYC - ' . $validated['name_client'] . ' ' . $validated['lastname_client'],
             'description' => 'Documento para firma electrónica',
-            'name_client' => $request->name_client,
-            'email_client' => $request->email_client,
+            'name_client' => $validated['name_client'],
+            'lastname_client' => $validated['lastname_client'],
+            'email_client' => $validated['email_client'],
             'name_employee' => $employee->name,
             'email_employee' => $employee->email,
-            'tipo_tercero' => $request->tipo_tercero,
-            'sucursal' => $request->sucursal,
-            'tipodeidentificacion' => $request->tipodeidentificacion,
-            'numero_identificacion' => $request->numero_identificacion,
-            'name' => $request->name,
-            'lastname' => $request->lastname,
-            'code_employee' => $employee->code_employee,
+            'tipo_tercero' => $validated['tipo_tercero'],
+            'sucursal' => $validated['sucursal'],
+            'tipodeidentificacion' => $validated['tipodeidentificacion'],
+            'numero_identificacion' => $validated['numero_identificacion'],
+            'name' => $validated['name_client'],
+            'lastname' => $validated['lastname_client'],
+            'code_employee' => (string)auth()->id(), // ID del usuario autenticado
+            // Campos opcionales del metadataList
+            'fechadevencimiento' => $request->fechadevencimiento,
+            'sexo' => $request->sexo,
+            'fechanacimiento' => $request->fechanacimiento,
+            'ciudaddenacimiento' => $request->ciudaddenacimiento,
+            'provinciadenacimiento' => $request->provinciadenacimiento,
+            'nacionalidad' => $request->nacionalidad,
+            'profesion' => $request->profesion,
+            'ocupacioncargo' => $request->ocupacioncargo,
+            'empresa' => $request->empresa,
+            'direcciondondelabora' => $request->direcciondondelabora,
+            'ciudad' => $request->ciudad,
+            'provincia' => $request->provincia,
+            'telefono' => $request->telefono,
+            'ciudadresidencia' => $request->ciudadresidencia,
+            'provinviaresidencia' => $request->provinviaresidencia,
+            'pais' => $request->pais,
+            'telefonoresidencia' => $request->telefonoresidencia,
+            'celular' => $request->celular,
+            'direccionresidencia' => $request->direccionresidencia,
+            'sector' => $request->sector,
+            'direccionparaenviarproductos' => $request->direccionparaenviarproductos,
+            'informacionactividadeconomica' => $request->informacionactividadeconomica,
+            'informacionfinanciera' => $request->informacionfinanciera,
+            'otrosingresos' => $request->otrosingresos,
+            'actividadeconomicadeotrosingresos' => $request->actividadeconomicadeotrosingresos,
+            'recursospublicos' => $request->recursospublicos,
+            'respuestaafirmativauno' => $request->respuestaafirmativauno,
+            'poderpublico' => $request->poderpublico,
+            'personareconocida' => $request->personareconocida,
+            'afirmativaderespuesta' => $request->afirmativaderespuesta,
+            'solicituddeseguro' => $request->solicituddeseguro,
+            'fecha' => $request->fecha ?? now()->format('d/m/Y'),
         ];
 
         $response = $kycUsuarioUnicoService->enviarFormularioKyc($data);
-        if ($response['success']) {
-            //guarda los datos en la tabla kyc_sends
-            $kycSend = new KycSend();
-            $kycSend->email = $request->email_client;
-            $kycSend->shipping_status = true;
-            $kycSend->kyc_status = $response['data']['status'];
-            $kycSend->employee_id = $employee->id;
-            $kycSend->tracking_code = $response['data']['tracking_code'];
-            $kycSend->client_code = $response['data']['client_code'];
-            $kycSend->save();
-        }else{
-            Log::error('Error al enviar el formulario KYC: ' . $response['error']);
-            return response()->json(['error' => 'Error al enviar el formulario KYC'], 500);
+        
+        if ($response['success'] && isset($response['data'])) {
+            $apiResponse = $response['data'];
+            
+            // Guardar los datos en la tabla kyc_sends
+            KycSend::create([
+                'email' => $validated['email_client'],
+                'name_client' => $validated['name_client'],
+                'lastname_client' => $validated['lastname_client'],
+                'shipping_status' => isset($apiResponse['status']) && $apiResponse['status'] === 'RECEIVED',
+                'kyc_status' => $apiResponse['status'] ?? 'UNKNOWN',
+                'status_firmante01' => 'WAITING',
+                'status_firmante02' => 'WAITING',
+                'employee_id' => $employee->id,
+                'tracking_code' => $apiResponse['code'] ?? null,
+                'client_code' => $validated['numero_identificacion'] ?? null,
+            ]);
+
+            return redirect()->route('clientes.index')->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
         }
-        //redireccionar al dashboard
-        return redirect()->route('dashboard');
+
+        Log::error('Error al enviar el formulario KYC: ' . ($response['error'] ?? 'Error desconocido'));
+        return back()->withErrors([
+            'kyc_error' => $response['error'] ?? 'Error al enviar el formulario KYC',
+        ])->withInput();
     }
 }

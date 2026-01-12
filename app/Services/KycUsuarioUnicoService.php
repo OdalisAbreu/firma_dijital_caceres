@@ -216,39 +216,74 @@ class KycUsuarioUnicoService
                             ],
                         ],
                     ],
-                    'metadataList' => [
-                        [
-                            'key' => 'tipodetercero',
-                            'value' => $tipoTercero,
-                        ],
-                        [
-                            'key' => 'sucursal',
-                            'value' => $sucursal,
-                        ],
-                        [
-                            'key' => 'tipodeidentificacion',
-                            'value' => $tipoIdentificacion,
-                        ],
-                        [
-                            'key' => 'numero',
-                            'value' => $numeroIdentificacion,
-                        ],
-                        [
-                            'key' => 'nombreyapellidos',
-                            'value' => "{$name} {$lastname}",
-                        ],
-                        [
-                            'key' => 'correoelectronico',
-                            'value' => $emailClient,
-                        ],
-                        [
-                            'key' => 'codigodelempleado',
-                            'value' => $codeEmployee,
-                        ],
-                    ],
+                    'metadataList' => $this->construirMetadataList($data, $tipoIdentificacion, $numeroIdentificacion, $name, $lastname, $emailClient, $codeEmployee, $tipoTercero, $sucursal),
                 ],
             ],
         ];
+    }
+
+    /**
+     * Construye la lista de metadata para el payload
+     */
+    protected function construirMetadataList(array $data, string $tipoIdentificacion, string $numeroIdentificacion, string $name, string $lastname, string $emailClient, string $codeEmployee, string $tipoTercero, string $sucursal): array
+    {
+        $metadataList = [];
+
+        // Campos obligatorios o con valores por defecto
+        $metadataList[] = ['key' => 'tipodeidentificacion', 'value' => $tipoIdentificacion];
+        $metadataList[] = ['key' => 'numero', 'value' => $numeroIdentificacion];
+        $metadataList[] = ['key' => 'nombreyapellidos', 'value' => trim("{$name} {$lastname}")];
+        $metadataList[] = ['key' => 'correoelectronico', 'value' => $emailClient];
+        $metadataList[] = ['key' => 'codigodelempleado', 'value' => $codeEmployee];
+        $metadataList[] = ['key' => 'tipodetercero', 'value' => $tipoTercero];
+        $metadataList[] = ['key' => 'sucursal', 'value' => $sucursal];
+
+        // Campos opcionales - solo se agregan si están presentes en $data
+        $optionalFields = [
+            'fechadevencimiento',
+            'sexo',
+            'fechanacimiento',
+            'ciudaddenacimiento',
+            'provinciadenacimiento',
+            'nacionalidad',
+            'profesion',
+            'ocupacioncargo',
+            'empresa',
+            'direcciondondelabora',
+            'ciudad',
+            'provincia',
+            'telefono',
+            'ciudadresidencia',
+            'provinviaresidencia',
+            'pais',
+            'telefonoresidencia',
+            'celular',
+            'direccionresidencia',
+            'sector',
+            'direccionparaenviarproductos',
+            'informacionactividadeconomica',
+            'informacionfinanciera',
+            'otrosingresos',
+            'actividadeconomicadeotrosingresos',
+            'recursospublicos',
+            'respuestaafirmativauno',
+            'poderpublico',
+            'personareconocida',
+            'afirmativaderespuesta',
+            'solicituddeseguro',
+            'fecha',
+        ];
+
+        foreach ($optionalFields as $field) {
+            if (isset($data[$field]) && $data[$field] !== null && $data[$field] !== '') {
+                $metadataList[] = [
+                    'key' => $field,
+                    'value' => $data[$field],
+                ];
+            }
+        }
+
+        return $metadataList;
     }
 
     /**

@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
 
     // Clientes routes
     Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+    Route::post('/clientes/enviar-kyc', [ClienteController::class, 'createKycUsurioUnico'])->name('clientes.enviar-kyc');
 
     // KYC Send routes
     Route::prefix('kyc-send')->name('kyc-send.')->group(function () {
