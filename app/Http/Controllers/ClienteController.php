@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
+use App\Models\KycSend;
 use App\Services\ClienteService;
+use App\Services\KycUsuarioUnicoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ClienteController extends Controller
@@ -72,5 +76,49 @@ class ClienteController extends Controller
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
         ]);
+    }
+
+    public function createKycUsurioUnico(Request $request){
+
+        //integrar el servicio de kyc usuario unico
+        $kycUsuarioUnicoService = new KycUsuarioUnicoService();
+
+        $employee = Employee::find($request->employee_id);
+        if (!$employee) {
+            return response()->json(['error' => 'Empleado no encontrado'], 404);
+        }
+        $data = [
+            'title' => 'Formulario KYC',
+            'description' => 'Documento para firma electrónica',
+            'name_client' => $request->name_client,
+            'email_client' => $request->email_client,
+            'name_employee' => $employee->name,
+            'email_employee' => $employee->email,
+            'tipo_tercero' => $request->tipo_tercero,
+            'sucursal' => $request->sucursal,
+            'tipodeidentificacion' => $request->tipodeidentificacion,
+            'numero_identificacion' => $request->numero_identificacion,
+            'name' => $request->name,
+            'lastname' => $request->lastname,
+            'code_employee' => $employee->code_employee,
+        ];
+
+        $response = $kycUsuarioUnicoService->enviarFormularioKyc($data);
+        if ($response['success']) {
+            //guarda los datos en la tabla kyc_sends
+            $kycSend = new KycSend();
+            $kycSend->email = $request->email_client;
+            $kycSend->shipping_status = true;
+            $kycSend->kyc_status = $response['data']['status'];
+            $kycSend->employee_id = $employee->id;
+            $kycSend->tracking_code = $response['data']['tracking_code'];
+            $kycSend->client_code = $response['data']['client_code'];
+            $kycSend->save();
+        }else{
+            Log::error('Error al enviar el formulario KYC: ' . $response['error']);
+            return response()->json(['error' => 'Error al enviar el formulario KYC'], 500);
+        }
+        //redireccionar al dashboard
+        return redirect()->route('dashboard');
     }
 }

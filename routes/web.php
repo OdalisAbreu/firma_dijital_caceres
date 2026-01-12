@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\KycSendController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
@@ -26,9 +27,8 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::post('/dashboard/actualizar-estados', [App\Http\Controllers\DashboardController::class, 'actualizarEstados'])->middleware(['auth', 'verified'])->name('dashboard.actualizar-estados');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -37,6 +37,12 @@ Route::middleware('auth')->group(function () {
 
     // Clientes routes
     Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+
+    // KYC Send routes
+    Route::prefix('kyc-send')->name('kyc-send.')->group(function () {
+        Route::get('/create', [KycSendController::class, 'create'])->name('create');
+        Route::post('/', [KycSendController::class, 'store'])->name('store');
+    });
 
     // Admin routes
     Route::prefix('admin')->name('admin.')->group(function () {

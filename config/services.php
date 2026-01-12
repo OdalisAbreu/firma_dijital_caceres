@@ -37,4 +37,10 @@ return [
         'password' => env('CLIENTES_API_PASSWORD', 'Caramelo#2030'),
     ],
 
+    'kyc_api' => [
+        'base_url' => env('KYC_API_BASE_URL', 'https://sandbox.viafirma.com/documents/api/v3'),
+        'username' => env('KYC_API_USER', 'test_caceresyasociados'),
+        'password' => env('KYC_API_PASSWORD', 'y]YS38\'02jT|xWe'),
+    ],
+
 ];

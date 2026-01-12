@@ -100,6 +100,9 @@ onMounted(() => {
                                             <DropdownLink :href="route('clientes.index')" :active="route().current('clientes.*')">
                                                 Clientes
                                             </DropdownLink>
+                                            <DropdownLink :href="route('kyc-send.create')" :active="route().current('kyc-send.*')">
+                                                Nuevo Cliente
+                                            </DropdownLink>
                                         </template>
                                     </Dropdown>
                                 </div>
@@ -315,6 +318,9 @@ onMounted(() => {
                             <div class="ml-4 space-y-1">
                                 <ResponsiveNavLink :href="route('clientes.index')" :active="route().current('clientes.*')">
                                     Clientes
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('kyc-send.create')" :active="route().current('kyc-send.*')">
+                                    Nuevo Cliente
                                 </ResponsiveNavLink>
                             </div>
                         </div>

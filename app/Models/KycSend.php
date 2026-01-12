@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class KycSend extends Model
 {
     use HasFactory;
-    protected $fillable = ['email', 'shipping_status', 'kyc_status', 'employee_id', 'tracking_code', 'client_code'];
+    protected $fillable = ['email', 'name_client', 'lastname_client', 'shipping_status', 'kyc_status', 'status_firmante01', 'status_firmante02', 'employee_id', 'tracking_code', 'client_code'];
 
     public function employee()
     {
