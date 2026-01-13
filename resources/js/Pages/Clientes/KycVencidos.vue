@@ -136,6 +136,7 @@ const userDisplay = computed(() => {
 const showModal = ref(false);
 const selectedCliente = ref(null);
 const kycForm = useForm({
+    tipo_persona: '',
     name_client: '',
     lastname_client: '',
     email_client: '',
@@ -266,6 +267,14 @@ const getNumeroIdentificacion = (cliente) => {
 
 const enviarKYC = (cliente) => {
     selectedCliente.value = cliente;
+    
+    // Determinar tipo de persona basado en tipo_cliente
+    const tipoCliente = cliente.tipo_cliente || '';
+    if (tipoCliente === 'PERSONAL' || tipoCliente === 'PERSONALES PREMIUM') {
+        kycForm.tipo_persona = 'fisica';
+    } else {
+        kycForm.tipo_persona = 'juridica';
+    }
     
     // Prellenar el formulario con los datos del cliente
     kycForm.name_client = cliente.nombre || '';
@@ -622,6 +631,22 @@ const submitKyc = () => {
                             <form @submit.prevent="submitKyc" class="space-y-4">
                                 <!-- Campos Obligatorios -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Tipo de Persona * -->
+                                    <div>
+                                        <InputLabel for="tipo_persona" value="Tipo de Persona *" />
+                                        <select
+                                            id="tipo_persona"
+                                            v-model="kycForm.tipo_persona"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                            required
+                                        >
+                                            <option value="">Seleccione...</option>
+                                            <option value="fisica">Persona Física</option>
+                                            <option value="juridica">Persona Jurídica</option>
+                                        </select>
+                                        <span v-if="kycForm.errors.tipo_persona" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.tipo_persona }}</span>
+                                    </div>
+
                                     <!-- Tipo de Tercero * -->
                                     <div>
                                         <InputLabel for="tipo_tercero" value="Tipo de Tercero *" />

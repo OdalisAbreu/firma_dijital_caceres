@@ -33,6 +33,7 @@ class KycSendController extends Controller
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:500',
+            'tipo_persona' => 'required|in:fisica,juridica',
             'name_client' => 'required|string|max:255',
             'lastname_client' => 'required|string|max:255',
             'email_client' => 'required|email|max:255',
@@ -82,6 +83,7 @@ class KycSendController extends Controller
         $kycData = [
             'title' => $validated['title'] ?? 'Formulario KYC - ' . $validated['name_client'] . ' ' . $validated['lastname_client'],
             'description' => $validated['description'] ?? 'Documento para firma electrónica',
+            'tipodepersona' => $validated['tipo_persona'],
             'name_client' => $validated['name_client'],
             'lastname_client' => $validated['lastname_client'],
             'email_client' => $validated['email_client'],

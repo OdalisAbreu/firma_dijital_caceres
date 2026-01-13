@@ -79,6 +79,7 @@ const userDisplay = computed(() => {
 const form = useForm({
     title: '',
     description: '',
+    tipo_persona: '',
     name_client: '',
     lastname_client: '',
     email_client: '',
@@ -126,6 +127,12 @@ const tipoIdentificacionOptions = [
     { value: 'Cédula', label: 'Cédula' },
     { value: 'RNC', label: 'RNC' },
     { value: 'Pasaporte', label: 'Pasaporte' },
+];
+
+const tipoPersonaOptions = [
+    { value: '', label: 'Seleccione...' },
+    { value: 'fisica', label: 'Persona Física' },
+    { value: 'juridica', label: 'Persona Jurídica' },
 ];
 
 const tipoTerceroOptions = [
@@ -214,6 +221,26 @@ const submit = () => {
 
                             <!-- Campos en grid de 3 columnas -->
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+
+                                <!-- Dropdown de Tipo de Persona -->
+                                <div>
+                                    <InputLabel for="tipo_persona" value="Tipo de Persona" />
+                                    <select
+                                        id="tipo_persona"
+                                        v-model="form.tipo_persona"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                    >
+                                        <option
+                                            v-for="option in tipoPersonaOptions"
+                                            :key="option.value"
+                                            :value="option.value"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                        >
+                                            {{ option.label }}
+                                        </option>
+                                    </select>
+                                <InputError class="mt-2" :message="form.errors.tipo_persona" />
+                                </div>
                                 <!-- Nombre Cliente -->
                                 <div>
                                     <InputLabel for="name_client" value="Nombre del Cliente *" />

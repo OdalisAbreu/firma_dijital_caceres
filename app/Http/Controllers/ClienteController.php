@@ -81,6 +81,7 @@ class ClienteController extends Controller
     {
         // Validar campos obligatorios
         $validated = $request->validate([
+            'tipo_persona' => 'required|in:fisica,juridica',
             'name_client' => 'required|string|max:255',
             'lastname_client' => 'required|string|max:255',
             'email_client' => 'required|email|max:255',
@@ -99,6 +100,7 @@ class ClienteController extends Controller
         $data = [
             'title' => 'Formulario KYC - ' . $validated['name_client'] . ' ' . $validated['lastname_client'],
             'description' => 'Documento para firma electrónica',
+            'tipodepersona' => $validated['tipo_persona'],
             'name_client' => $validated['name_client'],
             'lastname_client' => $validated['lastname_client'],
             'email_client' => $validated['email_client'],

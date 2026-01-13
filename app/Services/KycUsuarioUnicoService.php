@@ -104,6 +104,7 @@ class KycUsuarioUnicoService
      */
     protected function construirPayload(array $data): array
     {
+        $tipo_formulario = $data['tipodepersona'] == 'fisica' ? 'formulario_conocimiento_persona_fisica' : 'formulario_conocimiento_persona_juridica';
         // Valores por defecto
         $title = $data['title'] ?? 'Formulario KYC';
         $description = $data['description'] ?? 'Documento para firma electrónica';
@@ -146,7 +147,7 @@ class KycUsuarioUnicoService
                 [
                     'document' => [
                         'templateType' => 'pdf',
-                        'templateCode' => 'formulario_conocimiento_persona_fisica',
+                        'templateCode' => $tipo_formulario,
                         'formRequired' => true,
                         'formDisabled' => false,
                         'formRecipientKey' => 'firmante01',
