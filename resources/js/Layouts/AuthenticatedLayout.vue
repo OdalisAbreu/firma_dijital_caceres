@@ -97,8 +97,11 @@ onMounted(() => {
                                         </template>
 
                                         <template #content>
-                                            <DropdownLink :href="route('clientes.index')" :active="route().current('clientes.*')">
+                                            <DropdownLink :href="route('clientes.index')" :active="route().current('clientes.index')">
                                                 Clientes
+                                            </DropdownLink>
+                                            <DropdownLink :href="route('clientes.kyc-vencidos')" :active="route().current('clientes.kyc-vencidos')">
+                                                KYC Vencidos
                                             </DropdownLink>
                                             <DropdownLink :href="route('kyc-send.create')" :active="route().current('kyc-send.*')">
                                                 Nuevo Cliente
@@ -316,8 +319,11 @@ onMounted(() => {
                         <div class="px-4 py-2">
                             <div class="font-medium text-base text-white mb-2">Envío Individual</div>
                             <div class="ml-4 space-y-1">
-                                <ResponsiveNavLink :href="route('clientes.index')" :active="route().current('clientes.*')">
+                                <ResponsiveNavLink :href="route('clientes.index')" :active="route().current('clientes.index')">
                                     Clientes
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('clientes.kyc-vencidos')" :active="route().current('clientes.kyc-vencidos')">
+                                    KYC Vencidos
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('kyc-send.create')" :active="route().current('kyc-send.*')">
                                     Nuevo Cliente

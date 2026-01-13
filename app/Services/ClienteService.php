@@ -111,4 +111,85 @@ class ClienteService
             ];
         }
     }
+
+    /**
+     * Obtiene la lista de clientes con KYC vencidos
+     *
+     * @param array $filters Filtros opcionales:
+     *   - page: número de página (default: 1)
+     *   - page_size: tamaño de página (default: 10)
+     *   - cnomcliente: nombre del cliente
+     *   - estado_formulario: estado del formulario (ej: "VENCIDO (NO REMITIDO)")
+     *
+     * @return array Respuesta de la API
+     * @throws \Exception
+     */
+    public function getClientesKycVencidos(array $filters = []): array
+    {
+        try {
+            // Valores por defecto
+            $queryParams = [
+                'page' => $filters['page'] ?? 1,
+                'page_size' => $filters['page_size'] ?? 10,
+            ];
+
+            // Agregar filtros opcionales solo si están presentes
+            $optionalFilters = [
+                'cnomcliente',
+                'estado_formulario',
+            ];
+
+            foreach ($optionalFilters as $filter) {
+                if (isset($filters[$filter]) && $filters[$filter] !== null && $filters[$filter] !== '') {
+                    $queryParams[$filter] = $filters[$filter];
+                }
+            }
+
+            // Si no se especifica estado_formulario, filtrar por vencidos por defecto
+            if (!isset($queryParams['estado_formulario'])) {
+                $queryParams['estado_formulario'] = 'VENCIDO (NO REMITIDO)';
+            }
+
+            $response = $this->client->request('GET', '/api/kyc', [
+                'auth' => [$this->username, $this->password],
+                'query' => $queryParams,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+
+            return [
+                'success' => true,
+                'status_code' => $statusCode,
+                'data' => json_decode($body, true),
+            ];
+        } catch (GuzzleException $e) {
+            Log::error('Error al consumir API de clientes con KYC vencidos: ' . $e->getMessage(), [
+                'filters' => $filters,
+                'exception' => $e,
+            ]);
+
+            return [
+                'success' => false,
+                'status_code' => $e->getCode() ?: 500,
+                'error' => $e->getMessage(),
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error inesperado en ClienteService (getClientesKycVencidos): ' . $e->getMessage(), [
+                'filters' => $filters,
+                'exception' => $e,
+            ]);
+
+            return [
+                'success' => false,
+                'status_code' => 500,
+                'error' => 'Error inesperado: ' . $e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
 }
