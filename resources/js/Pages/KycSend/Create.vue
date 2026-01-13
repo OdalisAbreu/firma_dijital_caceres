@@ -200,7 +200,7 @@ const submit = () => {
 
                         <form @submit.prevent="submit">
                             <!-- Usuario (ancho completo, bloqueado) -->
-                            <div class="mt-4">
+                            <!--<div class="mt-4">
                                 <InputLabel for="user_name" value="Usuario" />
                                 <TextInput
                                     id="user_name"
@@ -210,7 +210,7 @@ const submit = () => {
                                     readonly
                                     disabled
                                 />
-                            </div>
+                            </div>-->
 
                             <!-- Campos en grid de 3 columnas -->
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
