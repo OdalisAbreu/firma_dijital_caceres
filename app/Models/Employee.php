@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Employee extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'email', 'department', 'position', 'major_employee', 'code_employee'];
+    protected $fillable = ['name', 'email', 'department', 'position', 'major_employee', 'code_employee', 'user_id'];
 
     protected $casts = [
         'major_employee' => 'boolean',
+        'user_id' => 'integer',
     ];
 
     protected static function boot()
@@ -27,9 +28,9 @@ class Employee extends Model
             }
         });
     }
-
-    public function kycSends()
+    public function user()
     {
-        return $this->hasMany(KycSend::class);
+        return $this->belongsTo(User::class);
     }
+
 }

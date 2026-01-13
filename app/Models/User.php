@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -41,5 +42,27 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+ 
     ];
+
+    public function kycSends()
+    {
+        return $this->hasMany(KycSend::class);
+    }
+
+    /**
+     * Verificar si el usuario es administrador
+     */
+    public function isAdministrador(): bool
+    {
+        return $this->role === 'administrador';
+    }
+
+    /**
+     * Verificar si el usuario es colaborador
+     */
+    public function isColaborador(): bool
+    {
+        return $this->role === 'colaborador';
+    }
 }

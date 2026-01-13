@@ -107,8 +107,8 @@ onMounted(() => {
                                     </Dropdown>
                                 </div>
 
-                                <!-- Configuración Dropdown -->
-                                <div class="relative -my-px">
+                                <!-- Configuración Dropdown - Solo para administradores -->
+                                <div v-if="$page.props.auth.user?.role === 'administrador'" class="relative -my-px">
                                     <Dropdown align="left" width="48">
                                         <template #trigger>
                                             <button
@@ -325,8 +325,8 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- Configuración -->
-                        <div class="px-4 py-2">
+                        <!-- Configuración - Solo para administradores -->
+                        <div v-if="$page.props.auth.user?.role === 'administrador'" class="px-4 py-2">
                             <div class="font-medium text-base text-white mb-2">Configuración</div>
                             <div class="ml-4 space-y-1">
                                 <ResponsiveNavLink :href="route('admin.index')" :active="route().current('admin.*')">

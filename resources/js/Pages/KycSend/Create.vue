@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 
 // Funciones para conversión de fechas
 const convertToDateInput = (dateString) => {
@@ -64,23 +64,19 @@ import InputLabel from '@/Components/InputLabel.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 
-const props = defineProps({
-    employees: {
-        type: Array,
-        required: true,
-    },
+const page = usePage();
+
+const userDisplay = computed(() => {
+    const user = page.props.auth?.user;
+    if (user && user.name && user.email) {
+        return `${user.name} - ${user.email}`;
+    }
+    return '';
 });
 
-// Buscar el empleado principal para preseleccionarlo
-const getMajorEmployeeId = () => {
-    const majorEmployee = props.employees.find(emp => emp.major_employee === true);
-    return majorEmployee ? majorEmployee.id.toString() : (props.employees[0] ? props.employees[0].id.toString() : '');
-};
-
 const form = useForm({
-    employee_id: getMajorEmployeeId(),
     title: '',
     description: '',
     name_client: '',
@@ -203,25 +199,17 @@ const submit = () => {
                         </div>
 
                         <form @submit.prevent="submit">
-                            <!-- Empleado (ancho completo) -->
+                            <!-- Usuario (ancho completo, bloqueado) -->
                             <div class="mt-4">
-                                <InputLabel for="employee_id" value="Empleado *" />
-                                <select
-                                    id="employee_id"
-                                    v-model="form.employee_id"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                    required
-                                >
-                                    <option value="">Seleccione un empleado...</option>
-                                    <option
-                                        v-for="employee in employees"
-                                        :key="employee.id"
-                                        :value="employee.id"
-                                    >
-                                        {{ employee.name }} {{ employee.major_employee ? '(Principal)' : '' }} - {{ employee.email }}
-                                    </option>
-                                </select>
-                                <InputError class="mt-2" :message="form.errors.employee_id" />
+                                <InputLabel for="user_name" value="Usuario" />
+                                <TextInput
+                                    id="user_name"
+                                    type="text"
+                                    class="mt-1 block w-full bg-gray-100 dark:bg-gray-700"
+                                    :value="userDisplay"
+                                    readonly
+                                    disabled
+                                />
                             </div>
 
                             <!-- Campos en grid de 3 columnas -->

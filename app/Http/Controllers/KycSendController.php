@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
 use App\Models\KycSend;
 use App\Services\KycUsuarioUnicoService;
 use Illuminate\Http\Request;
@@ -23,19 +22,7 @@ class KycSendController extends Controller
      */
     public function create()
     {
-        // Obtener empleados ordenados: primero el major_employee, luego los demás
-        $majorEmployee = Employee::where('major_employee', true)->first();
-        $otherEmployees = Employee::where('major_employee', false)->orWhereNull('major_employee')->get();
-        
-        $employees = collect();
-        if ($majorEmployee) {
-            $employees->push($majorEmployee);
-        }
-        $employees = $employees->merge($otherEmployees);
-
-        return Inertia::render('KycSend/Create', [
-            'employees' => $employees->values(),
-        ]);
+        return Inertia::render('KycSend/Create');
     }
 
     /**
@@ -44,7 +31,6 @@ class KycSendController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:500',
             'name_client' => 'required|string|max:255',
@@ -89,8 +75,8 @@ class KycSendController extends Controller
             'fecha' => 'nullable|string|max:255',
         ]);
 
-        // Obtener el empleado seleccionado
-        $employee = Employee::findOrFail($validated['employee_id']);
+        // Obtener el usuario autenticado
+        $user = auth()->user();
 
         // Preparar datos para el servicio
         $kycData = [
@@ -99,8 +85,8 @@ class KycSendController extends Controller
             'name_client' => $validated['name_client'],
             'lastname_client' => $validated['lastname_client'],
             'email_client' => $validated['email_client'],
-            'name_employee' => $employee->name,
-            'email_employee' => $employee->email,
+            'name_employee' => $user->name,
+            'email_employee' => $user->email,
             'tipo_tercero' => $validated['tipo_tercero'],
             'sucursal' => $validated['sucursal'],
             'tipodeidentificacion' => $validated['tipo_identificacion'],
@@ -158,7 +144,7 @@ class KycSendController extends Controller
                 'kyc_status' => $apiResponse['status'] ?? 'UNKNOWN',
                 'status_firmante01' => 'WAITING',
                 'status_firmante02' => 'WAITING',
-                'employee_id' => $validated['employee_id'],
+                'user_id' => auth()->id(),
                 'tracking_code' => $apiResponse['code'] ?? null,
                 'client_code' => $validated['numero_identificacion'] ?? null,
             ]);

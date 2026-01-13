@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
 use App\Models\KycSend;
 use App\Services\ClienteService;
 use App\Services\KycUsuarioUnicoService;
@@ -71,18 +70,10 @@ class ClienteController extends Controller
             'last_page' => $data['total_pages'] ?? 1,
         ];
 
-        // Obtener el empleado principal para el formulario KYC
-        $majorEmployee = Employee::where('major_employee', true)->first();
-        
-        // Obtener todos los empleados para el dropdown
-        $employees = Employee::orderBy('major_employee', 'desc')->orderBy('name')->get();
-
         return Inertia::render('Clientes/Index', [
             'clientes' => $clientes,
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
-            'majorEmployee' => $majorEmployee,
-            'employees' => $employees, // Pasar todos los empleados para el dropdown
         ]);
     }
 
@@ -90,7 +81,6 @@ class ClienteController extends Controller
     {
         // Validar campos obligatorios
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
             'name_client' => 'required|string|max:255',
             'lastname_client' => 'required|string|max:255',
             'email_client' => 'required|email|max:255',
@@ -103,7 +93,7 @@ class ClienteController extends Controller
         // Integrar el servicio de kyc usuario unico
         $kycUsuarioUnicoService = new KycUsuarioUnicoService();
 
-        $employee = Employee::findOrFail($validated['employee_id']);
+        $user = auth()->user();
 
         // Preparar todos los datos para el servicio
         $data = [
@@ -112,8 +102,8 @@ class ClienteController extends Controller
             'name_client' => $validated['name_client'],
             'lastname_client' => $validated['lastname_client'],
             'email_client' => $validated['email_client'],
-            'name_employee' => $employee->name,
-            'email_employee' => $employee->email,
+            'name_employee' => $user->name,
+            'email_employee' => $user->email,
             'tipo_tercero' => $validated['tipo_tercero'],
             'sucursal' => $validated['sucursal'],
             'tipodeidentificacion' => $validated['tipodeidentificacion'],
@@ -170,7 +160,7 @@ class ClienteController extends Controller
                 'kyc_status' => $apiResponse['status'] ?? 'UNKNOWN',
                 'status_firmante01' => 'WAITING',
                 'status_firmante02' => 'WAITING',
-                'employee_id' => $employee->id,
+                'user_id' => auth()->id(),
                 'tracking_code' => $apiResponse['code'] ?? null,
                 'client_code' => $validated['numero_identificacion'] ?? null,
             ]);

@@ -45,8 +45,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [KycSendController::class, 'store'])->name('store');
     });
 
-    // Admin routes
-    Route::prefix('admin')->name('admin.')->group(function () {
+    // Admin routes - Solo para administradores
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('index');
         Route::get('/create', [App\Http\Controllers\AdminController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\AdminController::class, 'store'])->name('store');
@@ -55,8 +55,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{user}', [App\Http\Controllers\AdminController::class, 'destroy'])->name('destroy');
     });
 
-    // Employees routes
-    Route::prefix('employees')->name('employees.')->group(function () {
+    // Employees routes - Solo para administradores
+    Route::middleware('admin')->prefix('employees')->name('employees.')->group(function () {
         Route::get('/', [EmployeeController::class, 'index'])->name('index');
         Route::get('/create', [EmployeeController::class, 'create'])->name('create');
         Route::post('/', [EmployeeController::class, 'store'])->name('store');

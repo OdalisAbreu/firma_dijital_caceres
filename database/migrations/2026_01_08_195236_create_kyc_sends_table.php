@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('email');
             $table->boolean('shipping_status')->default(false);
             $table->string('kyc_status');
-            $table->foreignId('employee_id')->constrained('employees');
+            $table->foreignId('user_id')->constrained('users');
             $table->string('tracking_code')->nullable();
             $table->string('client_code')->nullable();
             $table->timestamps();

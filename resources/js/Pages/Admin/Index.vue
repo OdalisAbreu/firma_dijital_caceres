@@ -61,6 +61,9 @@ const deleteUser = (userId) => {
                                             Email
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                            Rol
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Fecha de Registro
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
@@ -78,6 +81,17 @@ const deleteUser = (userId) => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-accent">
                                             {{ user.email }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span 
+                                                :class="{
+                                                    'px-2 py-1 text-xs font-semibold rounded-full': true,
+                                                    'bg-blue-100 text-blue-800': user.role === 'administrador',
+                                                    'bg-gray-100 text-gray-800': user.role === 'colaborador'
+                                                }"
+                                            >
+                                                {{ user.role === 'administrador' ? 'Administrador' : 'Colaborador' }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-accent">
                                             {{ new Date(user.created_at).toLocaleDateString('es-ES') }}

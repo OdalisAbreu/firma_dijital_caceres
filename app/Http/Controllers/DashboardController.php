@@ -20,8 +20,8 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // Obtener todos los KYC con la relación del empleado
-        $kycSends = KycSend::with('employee')
+        // Obtener todos los KYC con la relación del usuario
+        $kycSends = KycSend::with('user')
             ->latest()
             ->get();
 

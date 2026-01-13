@@ -257,7 +257,7 @@ const actualizarEstados = () => {
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
-                                            {{ kyc.employee?.name || 'N/A' }}
+                                            {{ kyc.user?.name || 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
                                             {{ formatDate(kyc.created_at) }}

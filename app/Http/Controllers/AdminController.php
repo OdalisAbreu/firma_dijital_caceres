@@ -42,12 +42,14 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:administrador,colaborador',
         ]);
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
+            'role' => $validated['role'],
         ]);
 
         return redirect()->route('admin.index')->with('success', 'Usuario creado exitosamente.');
@@ -72,18 +74,20 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|in:administrador,colaborador',
         ]);
 
-        $user->update([
+        $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
-        ]);
+            'role' => $validated['role'],
+        ];
 
-        if ($request->filled('password')) {
-            $user->update([
-                'password' => bcrypt($validated['password']),
-            ]);
+        if ($validated['password']) {
+            $updateData['password'] = bcrypt($validated['password']);
         }
+
+        $user->update($updateData);
 
         return redirect()->route('admin.index')->with('success', 'Usuario actualizado exitosamente.');
     }

@@ -4,8 +4,18 @@ import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
+
+const page = usePage();
+
+const userDisplay = computed(() => {
+    const user = page.props.auth?.user;
+    if (user && user.name && user.email) {
+        return `${user.name} - ${user.email}`;
+    }
+    return '';
+});
 
 const props = defineProps({
     clientes: {
@@ -23,14 +33,6 @@ const props = defineProps({
     error: {
         type: String,
         default: null,
-    },
-    majorEmployee: {
-        type: Object,
-        default: null,
-    },
-    employees: {
-        type: Array,
-        default: () => [],
     },
 });
 
@@ -110,7 +112,6 @@ const cambiarPageSize = (newSize) => {
 const showModal = ref(false);
 const selectedCliente = ref(null);
 const kycForm = useForm({
-    employee_id: props.majorEmployee?.id || '',
     name_client: '',
     lastname_client: '',
     email_client: '',
@@ -243,7 +244,6 @@ const enviarKYC = (cliente) => {
     selectedCliente.value = cliente;
     
     // Prellenar el formulario con los datos del cliente
-    kycForm.employee_id = props.majorEmployee?.id || '';
     kycForm.name_client = cliente.nombre || '';
     kycForm.lastname_client = cliente.apellido || '';
     kycForm.email_client = cliente.email_1 || '';
@@ -648,23 +648,15 @@ const getNombreCompleto = (cliente) => {
                             <form @submit.prevent="submitKyc" class="space-y-4">
                                 <!-- Empleado (ancho completo) -->
                                 <div>
-                                    <InputLabel for="employee_id" value="Empleado *" />
-                                    <select
-                                        id="employee_id"
-                                        v-model="kycForm.employee_id"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                        required
-                                    >
-                                        <option value="">Seleccione un empleado...</option>
-                                        <option
-                                            v-for="employee in employees"
-                                            :key="employee.id"
-                                            :value="employee.id"
-                                        >
-                                            {{ employee.name }} {{ employee.major_employee ? '(Principal)' : '' }} - {{ employee.email }}
-                                        </option>
-                                    </select>
-                                    <InputError class="mt-2" :message="kycForm.errors.employee_id" />
+                                    <InputLabel for="user_name" value="Usuario" />
+                                    <TextInput
+                                        id="user_name"
+                                        type="text"
+                                        class="mt-1 block w-full bg-gray-100 dark:bg-gray-700"
+                                        :value="userDisplay"
+                                        readonly
+                                        disabled
+                                    />
                                 </div>
 
                                 <!-- Campos Obligatorios -->
