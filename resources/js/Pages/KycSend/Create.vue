@@ -255,13 +255,12 @@ const submit = () => {
 
                                 <!-- Tipo de Identificación -->
                                 <div>
-                                    <InputLabel for="tipo_identificacion" value="Tipo de Identificación *" />
+                                    <InputLabel for="tipo_identificacion" value="Tipo de Identificación" />
                                     <select
                                         id="tipo_identificacion"
                                         v-model="form.tipo_identificacion"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                        required
-                                    >
+                                        >
                                         <option
                                             v-for="option in tipoIdentificacionOptions"
                                             :key="option.value"
@@ -275,7 +274,7 @@ const submit = () => {
 
                                 <!-- Número de Identificación -->
                                 <div v-if="mostrarCampoNumero">
-                                    <InputLabel for="numero_identificacion" value="Número de Identificación *" />
+                                    <InputLabel for="numero_identificacion" value="Número de Identificación" />
                                     <TextInput
                                         id="numero_identificacion"
                                         type="text"
@@ -289,12 +288,12 @@ const submit = () => {
 
                                 <!-- Tipo de Tercero -->
                                 <div>
-                                    <InputLabel for="tipo_tercero" value="Tipo de Tercero *" />
+                                    <InputLabel for="tipo_tercero" value="Tipo de Tercero" />
                                     <select
                                         id="tipo_tercero"
                                         v-model="form.tipo_tercero"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                        required
+                                        
                                     >
                                         <option
                                             v-for="option in tipoTerceroOptions"
@@ -309,12 +308,12 @@ const submit = () => {
 
                                 <!-- Sucursal -->
                                 <div>
-                                    <InputLabel for="sucursal" value="Sucursal *" />
+                                    <InputLabel for="sucursal" value="Sucursal" />
                                     <select
                                         id="sucursal"
                                         v-model="form.sucursal"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                        required
+                                        
                                     >
                                         <option
                                             v-for="option in sucursalOptions"
@@ -329,25 +328,25 @@ const submit = () => {
 
                                 <!-- Fecha de Vencimiento * -->
                                 <div>
-                                <InputLabel for="fechadevencimiento" value="Fecha de Vencimiento *" />
+                                <InputLabel for="fechadevencimiento" value="Fecha de Vencimiento" />
                                 <input
                                     id="fechadevencimiento"
                                     type="date"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                     v-model="fechadevencimientoDate"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.fechadevencimiento" />
                                 </div>
 
                                 <!-- Sexo * -->
                                 <div>
-                                <InputLabel for="sexo" value="Sexo *" />
+                                <InputLabel for="sexo" value="Sexo" />
                                 <select
                                     id="sexo"
                                     v-model="form.sexo"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                    required
+                                    
                                 >
                                     <option value="">Seleccione...</option>
                                     <option value="M">Masculino</option>
@@ -358,13 +357,13 @@ const submit = () => {
 
                                 <!-- Fecha de Nacimiento * -->
                                 <div>
-                                <InputLabel for="fechanacimiento" value="Fecha de Nacimiento *" />
+                                <InputLabel for="fechanacimiento" value="Fecha de Nacimiento" />
                                 <input
                                     id="fechanacimiento"
                                     type="date"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                     v-model="fechanacimientoDate"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.fechanacimiento" />
                                 </div>
@@ -407,52 +406,52 @@ const submit = () => {
 
                                 <!-- Profesión * -->
                                 <div>
-                                <InputLabel for="profesion" value="Profesión *" />
+                                <InputLabel for="profesion" value="Profesión" />
                                 <TextInput
                                     id="profesion"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-900"
                                     v-model="form.profesion"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.profesion" />
                                 </div>
 
                                 <!-- Ocupación/Cargo * -->
                                 <div>
-                                <InputLabel for="ocupacioncargo" value="Ocupación/Cargo *" />
+                                <InputLabel for="ocupacioncargo" value="Ocupación/Cargo" />
                                 <TextInput
                                     id="ocupacioncargo"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-900"
                                     v-model="form.ocupacioncargo"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.ocupacioncargo" />
                                 </div>
 
                                 <!-- Empresa * -->
                                 <div>
-                                <InputLabel for="empresa" value="Empresa *" />
+                                <InputLabel for="empresa" value="Empresa" />
                                 <TextInput
                                     id="empresa"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-900"
                                     v-model="form.empresa"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.empresa" />
                                 </div>
 
                                 <!-- Dirección donde labora * -->
                                 <div>
-                                <InputLabel for="direcciondondelabora" value="Dirección donde labora *" />
+                                <InputLabel for="direcciondondelabora" value="Dirección donde labora" />
                                 <TextInput
                                     id="direcciondondelabora"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-900"
                                     v-model="form.direcciondondelabora"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.direcciondondelabora" />
                                 </div>
@@ -481,15 +480,15 @@ const submit = () => {
                                     <InputError class="mt-2" :message="form.errors.provincia" />
                                 </div>
 
-                                <!-- Teléfono * -->
+                                    <!-- Teléfono -->
                                 <div>
-                                <InputLabel for="telefono" value="Teléfono *" />
+                                <InputLabel for="telefono" value="Teléfono" />
                                 <TextInput
                                     id="telefono"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-900"
                                     v-model="form.telefono"
-                                    required
+                                    
                                 />
                                     <InputError class="mt-2" :message="form.errors.telefono" />
                                 </div>

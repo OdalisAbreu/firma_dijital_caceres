@@ -647,7 +647,7 @@ const getNombreCompleto = (cliente) => {
 
                             <form @submit.prevent="submitKyc" class="space-y-4">
                                 <!-- Empleado (ancho completo) -->
-                                <div>
+                                <!--<div>
                                     <InputLabel for="user_name" value="Usuario" />
                                     <TextInput
                                         id="user_name"
@@ -657,7 +657,7 @@ const getNombreCompleto = (cliente) => {
                                         readonly
                                         disabled
                                     />
-                                </div>
+                                </div> -->
 
                                 <!-- Campos Obligatorios -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -786,13 +786,12 @@ const getNombreCompleto = (cliente) => {
 
                                     <!-- Fecha de Nacimiento * -->
                                     <div>
-                                        <InputLabel for="fechanacimiento" value="Fecha de Nacimiento *" />
+                                        <InputLabel for="fechanacimiento" value="Fecha de Nacimiento" />
                                         <input
                                             id="fechanacimiento"
                                             type="date"
                                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                            v-model="fechanacimientoDate"
-                                            required
+                                            v-model="fechanacimientoDate"                                            
                                         />
                                         <span v-if="kycForm.errors.fechanacimiento" class="text-red-600 text-sm">{{ kycForm.errors.fechanacimiento }}</span>
                                     </div>
@@ -832,52 +831,48 @@ const getNombreCompleto = (cliente) => {
 
                                     <!-- Profesión * -->
                                     <div>
-                                        <InputLabel for="profesion" value="Profesión *" />
+                                        <InputLabel for="profesion" value="Profesión" />
                                         <TextInput
                                             id="profesion"
                                             type="text"
                                             class="mt-1 block w-full"
                                             v-model="kycForm.profesion"
-                                            required
                                         />
                                         <span v-if="kycForm.errors.profesion" class="text-red-600 text-sm">{{ kycForm.errors.profesion }}</span>
                                     </div>
 
                                     <!-- Ocupación/Cargo * -->
                                     <div>
-                                        <InputLabel for="ocupacioncargo" value="Ocupación/Cargo *" />
+                                        <InputLabel for="ocupacioncargo" value="Ocupación/Cargo" />
                                         <TextInput
                                             id="ocupacioncargo"
                                             type="text"
                                             class="mt-1 block w-full"
                                             v-model="kycForm.ocupacioncargo"
-                                            required
                                         />
                                         <span v-if="kycForm.errors.ocupacioncargo" class="text-red-600 text-sm">{{ kycForm.errors.ocupacioncargo }}</span>
                                     </div>
 
                                     <!-- Empresa * -->
                                     <div>
-                                        <InputLabel for="empresa" value="Empresa *" />
+                                        <InputLabel for="empresa" value="Empresa" />
                                         <TextInput
                                             id="empresa"
                                             type="text"
                                             class="mt-1 block w-full"
                                             v-model="kycForm.empresa"
-                                            required
                                         />
                                         <span v-if="kycForm.errors.empresa" class="text-red-600 text-sm">{{ kycForm.errors.empresa }}</span>
                                     </div>
 
                                     <!-- Dirección donde labora * -->
                                     <div>
-                                        <InputLabel for="direcciondondelabora" value="Dirección donde labora *" />
+                                        <InputLabel for="direcciondondelabora" value="Dirección donde labora" />
                                         <TextInput
                                             id="direcciondondelabora"
                                             type="text"
                                             class="mt-1 block w-full"
                                             v-model="kycForm.direcciondondelabora"
-                                            required
                                         />
                                         <span v-if="kycForm.errors.direcciondondelabora" class="text-red-600 text-sm">{{ kycForm.errors.direcciondondelabora }}</span>
                                     </div>
@@ -906,13 +901,12 @@ const getNombreCompleto = (cliente) => {
 
                                     <!-- Teléfono * -->
                                     <div>
-                                        <InputLabel for="telefono" value="Teléfono *" />
+                                        <InputLabel for="telefono" value="Teléfono" />
                                         <TextInput
                                             id="telefono"
                                             type="text"
                                             class="mt-1 block w-full"
                                             v-model="kycForm.telefono"
-                                            required
                                         />
                                         <span v-if="kycForm.errors.telefono" class="text-red-600 text-sm">{{ kycForm.errors.telefono }}</span>
                                     </div>
