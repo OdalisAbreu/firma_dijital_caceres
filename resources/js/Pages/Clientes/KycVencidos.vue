@@ -87,8 +87,8 @@ const getCedulaRncPasaporte = (cliente) => {
     if (cliente.rnc) {
         return cliente.rnc;
     }
-    if (cliente.pasporrte) {
-        return cliente.pasporrte;
+    if (cliente.pasaporte) {
+        return cliente.pasaporte;
     }
     return '-';
 };
@@ -254,14 +254,14 @@ const fechaDate = computed({
 const getTipoIdentificacion = (cliente) => {
     if (cliente.cedula) return 'Cédula';
     if (cliente.rnc) return 'RNC';
-    if (cliente.pasporrte) return 'Pasaporte';
+    if (cliente.pasaporte) return 'Pasaporte';
     return '';
 };
 
 const getNumeroIdentificacion = (cliente) => {
     if (cliente.cedula) return cliente.cedula;
     if (cliente.rnc) return cliente.rnc;
-    if (cliente.pasporrte) return cliente.pasporrte;
+    if (cliente.pasaporte) return cliente.pasaporte;
     return '';
 };
 
@@ -279,20 +279,53 @@ const enviarKYC = (cliente) => {
     // Prellenar el formulario con los datos del cliente
     kycForm.name_client = cliente.nombre || '';
     kycForm.lastname_client = cliente.apellido || '';
-    kycForm.email_client = cliente.email_1 || '';
+    kycForm.email_client = cliente.correo_electronico || '';
     kycForm.sucursal = cliente.sucursal || 'Principal';
     kycForm.tipodeidentificacion = getTipoIdentificacion(cliente);
     kycForm.numero_identificacion = getNumeroIdentificacion(cliente);
     kycForm.sexo = cliente.sexo || '';
     kycForm.fechanacimiento = formatDateForInput(cliente.fecha_nacimiento);
-    kycForm.profesion = cliente.profecion || '';
-    kycForm.ocupacioncargo = cliente.cargo || '';
+    kycForm.profesion = cliente.profesion || '';
+    kycForm.ocupacioncargo = cliente.ocupacion || '';
     kycForm.empresa = cliente.empresa || '';
-    kycForm.direcciondondelabora = cliente.dirreccion_1 || '';
-    kycForm.telefono = cliente.telefono_oficina || '';
-    kycForm.celular = cliente.numero_celular || '';
-    kycForm.direccionresidencia = cliente.dirreccion_casa_1 || '';
-    kycForm.sector = cliente.dirreccion_casa_2 || '';
+    kycForm.direcciondondelabora = cliente.dirreccion_lavoral || '';
+    kycForm.ciudad = cliente.ciudad_oficina || '';
+    kycForm.provincia = cliente.provincia_empresa || '';
+    kycForm.telefono = cliente.telefono_empresa || '';
+    kycForm.celular = cliente.numero_telefono || '';
+    kycForm.ciudadresidencia = cliente.ciudad_recidencia || '';
+    kycForm.provinviaresidencia = cliente.provincia_recidiencia || '';
+    kycForm.pais = cliente.pais_recidencia || '';
+    kycForm.direccionresidencia = cliente.dirreccion_recidencia || '';
+    kycForm.sector = cliente.sector || '';
+    kycForm.ciudaddenacimiento = cliente.ciudad_nacimiento || '';
+    kycForm.provinciadenacimiento = cliente.porvincia_nacimiento || '';
+    kycForm.nacionalidad = cliente.nacionalidad || '';
+    // Usar fecha_venc_form si existe (fecha de vencimiento del formulario), sino usar fecha_vencimiento (fecha de vencimiento de identificación)
+    kycForm.fechadevencimiento = formatDateForInput(cliente.fecha_venc_form || cliente.fecha_vencimiento);
+    // Campos adicionales del endpoint de KYC
+    kycForm.informacionactividadeconomica = cliente.actividad_economica || '';
+    kycForm.informacionfinanciera = cliente.ingesos_mensuales ? String(cliente.ingesos_mensuales) : '';
+    kycForm.otrosingresos = cliente.otros_ingresos ? String(cliente.otros_ingresos) : '';
+    kycForm.actividadeconomicadeotrosingresos = cliente.otros_ingresos_actividad || '';
+    // Mapear recursos_publicos: si tiene valor (no null y no vacío), usar "Si", sino "No"
+    kycForm.recursospublicos = (cliente.recursos_publicos && cliente.recursos_publicos !== '') ? 'Si' : '';
+    kycForm.respuestaafirmativauno = cliente.recursos_publicos_descripcion || '';
+    // Mapear poder_publico: si tiene valor (no null y no vacío), usar "Si", sino "No"
+    kycForm.poderpublico = (cliente.poder_publico && cliente.poder_publico !== '') ? 'Si' : '';
+    // Mapear influencia_publica: si tiene valor (no null y no vacío), usar "Si", sino "No"
+    kycForm.personareconocida = (cliente.influencia_publica && cliente.influencia_publica !== '') ? 'Si' : '';
+    // Mapear afirmativo_familia: si tiene valor (no null y no vacío), usar "Si", sino "No"
+    kycForm.afirmativaderespuesta = (cliente.afirmativo_familia && cliente.afirmativo_familia !== '') ? 'Si' : '';
+    // Mapear solicitud de seguro: construir string basado en los campos booleanos
+    const solicitudesSeguro = [];
+    if (cliente.solicitud_seguro_persona === 1) solicitudesSeguro.push('Personas');
+    if (cliente.solicitud_seguro_generales === 1) solicitudesSeguro.push('Generales');
+    if (cliente.solicitud_seguro_fianza === 1) solicitudesSeguro.push('Fianza');
+    if (cliente.solicitud_seguro_otros && cliente.solicitud_seguro_otros !== '') {
+        solicitudesSeguro.push(cliente.solicitud_seguro_otros);
+    }
+    kycForm.solicituddeseguro = solicitudesSeguro.length > 0 ? solicitudesSeguro.join(', ') : '';
     kycForm.fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     
     showModal.value = true;
@@ -485,9 +518,9 @@ const submitKyc = () => {
                                         <td class="px-6 py-4 text-sm text-accent dark:text-blue-400" style="max-width: 200px; width: 200px;">
                                             <div 
                                                 class="truncate" 
-                                                :title="cliente.email_1 || '-'"
+                                                :title="cliente.correo_electronico || '-'"
                                             >
-                                                {{ cliente.email_1 || '-' }}
+                                                {{ cliente.correo_electronico || '-' }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">

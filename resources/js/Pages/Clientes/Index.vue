@@ -255,20 +255,29 @@ const enviarKYC = (cliente) => {
     // Prellenar el formulario con los datos del cliente
     kycForm.name_client = cliente.nombre || '';
     kycForm.lastname_client = cliente.apellido || '';
-    kycForm.email_client = cliente.email_1 || '';
+    kycForm.email_client = cliente.correo_electronico || '';
     kycForm.sucursal = cliente.sucursal || 'Principal';
     kycForm.tipodeidentificacion = getTipoIdentificacion(cliente);
     kycForm.numero_identificacion = getNumeroIdentificacion(cliente);
     kycForm.sexo = cliente.sexo || '';
     kycForm.fechanacimiento = formatDateForInput(cliente.fecha_nacimiento);
-    kycForm.profesion = cliente.profecion || '';
-    kycForm.ocupacioncargo = cliente.cargo || '';
+    kycForm.profesion = cliente.profesion || '';
+    kycForm.ocupacioncargo = cliente.ocupacion || '';
     kycForm.empresa = cliente.empresa || '';
-    kycForm.direcciondondelabora = cliente.dirreccion_1 || '';
-    kycForm.telefono = cliente.telefono_oficina || '';
-    kycForm.celular = cliente.numero_celular || '';
-    kycForm.direccionresidencia = cliente.dirreccion_casa_1 || '';
-    kycForm.sector = cliente.dirreccion_casa_2 || '';
+    kycForm.direcciondondelabora = cliente.dirreccion_lavoral || '';
+    kycForm.ciudad = cliente.ciudad_oficina || '';
+    kycForm.provincia = cliente.provincia_empresa || '';
+    kycForm.telefono = cliente.telefono_empresa || '';
+    kycForm.celular = cliente.numero_telefono || '';
+    kycForm.ciudadresidencia = cliente.ciudad_recidencia || '';
+    kycForm.provinviaresidencia = cliente.provincia_recidiencia || '';
+    kycForm.pais = cliente.pais_recidencia || '';
+    kycForm.direccionresidencia = cliente.dirreccion_recidencia || '';
+    kycForm.sector = cliente.sector || '';
+    kycForm.ciudaddenacimiento = cliente.ciudad_nacimiento || '';
+    kycForm.provinciadenacimiento = cliente.porvincia_nacimiento || '';
+    kycForm.nacionalidad = cliente.nacionalidad || '';
+    kycForm.fechadevencimiento = formatDateForInput(cliente.fecha_vencimiento);
     kycForm.fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     
     showModal.value = true;
@@ -305,13 +314,15 @@ const getCedulaRnc = (cliente) => {
 };
 
 const getEstatusLabel = (estatus) => {
-    return estatus === 'A' ? 'Activo' : 'Inactivo';
+    if (!estatus) return 'N/A';
+    return estatus === 'C' ? 'Cliente' : estatus === 'P' ? 'Prospecto' : estatus;
 };
 
 const getEstatusClass = (estatus) => {
-    return estatus === 'A' 
+    if (!estatus) return 'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800';
+    return estatus === 'C' 
         ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' 
-        : 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
+        : 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800';
 };
 
 const getNombreCompleto = (cliente) => {
@@ -530,9 +541,9 @@ const getNombreCompleto = (cliente) => {
                                         <td class="px-6 py-4 text-sm text-accent" style="max-width: 150px; width: 150px;">
                                             <div 
                                                 class="truncate" 
-                                                :title="cliente.email_1 || '-'"
+                                                :title="cliente.correo_electronico || '-'"
                                             >
-                                                {{ cliente.email_1 || '-' }}
+                                                {{ cliente.correo_electronico || '-' }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
