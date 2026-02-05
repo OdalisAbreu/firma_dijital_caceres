@@ -113,6 +113,32 @@ class ClienteService
     }
 
     /**
+     * Obtiene la lista de clientes personales (endpoint dedicado).
+     *
+     * @param array $filters Filtros opcionales (mismos que getClientes)
+     *
+     * @return array Respuesta de la API
+     * @throws \Exception
+     */
+    public function getClientesPersonales(array $filters = []): array
+    {
+        return $this->getClientesPorEndpoint('/client/personales', $filters);
+    }
+
+    /**
+     * Obtiene la lista de clientes corporativos (endpoint dedicado).
+     *
+     * @param array $filters Filtros opcionales (mismos que getClientes)
+     *
+     * @return array Respuesta de la API
+     * @throws \Exception
+     */
+    public function getClientesCorporativos(array $filters = []): array
+    {
+        return $this->getClientesPorEndpoint('/client/corporativo', $filters);
+    }
+
+    /**
      * Obtiene la lista de clientes con KYC vencidos
      *
      * @param array $filters Filtros opcionales:
@@ -181,6 +207,169 @@ class ClienteService
         } catch (\Exception $e) {
             Log::error('Error inesperado en ClienteService (getClientesKycVencidos): ' . $e->getMessage(), [
                 'filters' => $filters,
+                'exception' => $e,
+            ]);
+
+            return [
+                'success' => false,
+                'status_code' => 500,
+                'error' => 'Error inesperado: ' . $e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Obtiene la lista de clientes personales con KYC vencidos (endpoint dedicado).
+     *
+     * @param array $filters Filtros opcionales (mismos que getClientesKycVencidos)
+     *
+     * @return array Respuesta de la API
+     * @throws \Exception
+     */
+    public function getClientesKycVencidosPersonales(array $filters = []): array
+    {
+        return $this->getClientesKycVencidosPorEndpoint('/kyc/personales', $filters);
+    }
+
+    /**
+     * Obtiene la lista de clientes corporativos con KYC vencidos (endpoint dedicado).
+     *
+     * @param array $filters Filtros opcionales (mismos que getClientesKycVencidos)
+     *
+     * @return array Respuesta de la API
+     * @throws \Exception
+     */
+    public function getClientesKycVencidosCorporativos(array $filters = []): array
+    {
+        return $this->getClientesKycVencidosPorEndpoint('/kyc/corporativos', $filters);
+    }
+
+    private function getClientesPorEndpoint(string $endpoint, array $filters = []): array
+    {
+        try {
+            $queryParams = [
+                'page' => $filters['page'] ?? 1,
+                'page_size' => $filters['page_size'] ?? 10,
+            ];
+
+            $optionalFilters = [
+                'cnomcliente',
+                'crnc',
+                'ccedula',
+                'tipo_cliente',
+                'estatus',
+                'sucursal',
+                'es_prospecto',
+            ];
+
+            foreach ($optionalFilters as $filter) {
+                if (isset($filters[$filter]) && $filters[$filter] !== null && $filters[$filter] !== '') {
+                    $queryParams[$filter] = $filters[$filter];
+                }
+            }
+
+            $response = $this->client->request('GET', $endpoint, [
+                'auth' => [$this->username, $this->password],
+                'query' => $queryParams,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+
+            return [
+                'success' => true,
+                'status_code' => $statusCode,
+                'data' => json_decode($body, true),
+            ];
+        } catch (GuzzleException $e) {
+            Log::error('Error al consumir API de clientes (endpoint dedicado): ' . $e->getMessage(), [
+                'filters' => $filters,
+                'endpoint' => $endpoint,
+                'exception' => $e,
+            ]);
+
+            return [
+                'success' => false,
+                'status_code' => $e->getCode() ?: 500,
+                'error' => $e->getMessage(),
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error inesperado en ClienteService (endpoint dedicado): ' . $e->getMessage(), [
+                'filters' => $filters,
+                'endpoint' => $endpoint,
+                'exception' => $e,
+            ]);
+
+            return [
+                'success' => false,
+                'status_code' => 500,
+                'error' => 'Error inesperado: ' . $e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
+
+    private function getClientesKycVencidosPorEndpoint(string $endpoint, array $filters = []): array
+    {
+        try {
+            $queryParams = [
+                'page' => $filters['page'] ?? 1,
+                'page_size' => $filters['page_size'] ?? 10,
+            ];
+
+            $optionalFilters = [
+                'cnomcliente',
+                'estado_formulario',
+            ];
+
+            foreach ($optionalFilters as $filter) {
+                if (isset($filters[$filter]) && $filters[$filter] !== null && $filters[$filter] !== '') {
+                    $queryParams[$filter] = $filters[$filter];
+                }
+            }
+
+            if (!isset($queryParams['estado_formulario'])) {
+                $queryParams['estado_formulario'] = 'VENCIDO (NO REMITIDO)';
+            }
+
+            $response = $this->client->request('GET', $endpoint, [
+                'auth' => [$this->username, $this->password],
+                'query' => $queryParams,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+
+            return [
+                'success' => true,
+                'status_code' => $statusCode,
+                'data' => json_decode($body, true),
+            ];
+        } catch (GuzzleException $e) {
+            Log::error('Error al consumir API de KYC vencidos (endpoint dedicado): ' . $e->getMessage(), [
+                'filters' => $filters,
+                'endpoint' => $endpoint,
+                'exception' => $e,
+            ]);
+
+            return [
+                'success' => false,
+                'status_code' => $e->getCode() ?: 500,
+                'error' => $e->getMessage(),
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error inesperado en ClienteService (KYC endpoint dedicado): ' . $e->getMessage(), [
+                'filters' => $filters,
+                'endpoint' => $endpoint,
                 'exception' => $e,
             ]);
 

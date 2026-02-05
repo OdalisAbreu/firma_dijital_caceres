@@ -101,7 +101,7 @@ const form = useForm({
     provincia: '',
     telefono: '',
     ciudadresidencia: '',
-    provinviaresidencia: '',
+    provinciaresidencia: '',
     pais: '',
     telefonoresidencia: '',
     celular: '',
@@ -534,14 +534,14 @@ const submit = () => {
 
                                 <!-- Provincia Residencia -->
                                 <div>
-                                <InputLabel for="provinviaresidencia" value="Provincia Residencia" />
+                                <InputLabel for="provinciaresidencia" value="Provincia Residencia" />
                                 <TextInput
-                                    id="provinviaresidencia"
+                                    id="provinciaresidencia"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-900"
-                                    v-model="form.provinviaresidencia"
+                                    v-model="form.provinciaresidencia"
                                 />
-                                    <InputError class="mt-2" :message="form.errors.provinviaresidencia" />
+                                    <InputError class="mt-2" :message="form.errors.provinciaresidencia" />
                                 </div>
 
                                 <!-- País Residencia -->

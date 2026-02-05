@@ -38,6 +38,15 @@ Route::middleware('auth')->group(function () {
     // Clientes routes
     Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
     Route::get('/clientes/kyc-vencidos', [ClienteController::class, 'kycVencidos'])->name('clientes.kyc-vencidos');
+    
+    // Clientes Personales routes
+    Route::get('/clientes/personales', [ClienteController::class, 'personales'])->name('clientes.personales.index');
+    Route::get('/clientes/personales/kyc-vencidos', [ClienteController::class, 'personalesKycVencidos'])->name('clientes.personales.kyc-vencidos');
+    
+    // Clientes Corporativos routes
+    Route::get('/clientes/corporativos', [ClienteController::class, 'corporativos'])->name('clientes.corporativos.index');
+    Route::get('/clientes/corporativos/kyc-vencidos', [ClienteController::class, 'corporativosKycVencidos'])->name('clientes.corporativos.kyc-vencidos');
+    
     Route::post('/clientes/enviar-kyc', [ClienteController::class, 'createKycUsurioUnico'])->name('clientes.enviar-kyc');
 
     // KYC Send routes

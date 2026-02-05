@@ -229,6 +229,11 @@ class KycUsuarioUnicoService
     protected function construirMetadataList(array $data, string $tipoIdentificacion, string $numeroIdentificacion, string $name, string $lastname, string $emailClient, string $codeEmployee, string $tipoTercero, string $sucursal): array
     {
         $metadataList = [];
+        $dateFields = ['fechadevencimiento', 'fechanacimiento', 'fecha'];
+
+        if (!isset($data['provinciaresidencia']) && isset($data['provinciaresidencia'])) {
+            $data['provinciaresidencia'] = $data['provinciaresidencia'];
+        }
 
         // Campos obligatorios o con valores por defecto
         $metadataList[] = ['key' => 'tipodeidentificacion', 'value' => $tipoIdentificacion];
@@ -255,7 +260,7 @@ class KycUsuarioUnicoService
             'provincia',
             'telefono',
             'ciudadresidencia',
-            'provinviaresidencia',
+            'provinciaresidencia',
             'pais',
             'telefonoresidencia',
             'celular',
@@ -277,14 +282,55 @@ class KycUsuarioUnicoService
 
         foreach ($optionalFields as $field) {
             if (isset($data[$field]) && $data[$field] !== null && $data[$field] !== '') {
+                $value = $data[$field];
+                if (in_array($field, $dateFields, true)) {
+                    $value = $this->formatearFechaMmDdAaaa($value);
+                }
                 $metadataList[] = [
                     'key' => $field,
-                    'value' => $data[$field],
+                    'value' => $value,
                 ];
             }
         }
 
         return $metadataList;
+    }
+
+    /**
+     * Convierte una fecha a formato mm/dd/yyyy si es posible.
+     */
+    protected function formatearFechaMmDdAaaa($value)
+    {
+        if (is_int($value)) {
+            $timestamp = $value < 1000000000000 ? $value : (int) floor($value / 1000);
+            return date('m/d/Y', $timestamp);
+        }
+
+        if (is_numeric($value)) {
+            $numericValue = (int) $value;
+            $timestamp = $numericValue < 1000000000000 ? $numericValue : (int) floor($numericValue / 1000);
+            return date('m/d/Y', $timestamp);
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return $value;
+        }
+
+        $formats = ['d/m/Y', 'Y-m-d', 'd-m-Y', 'm/d/Y'];
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $value);
+            if ($date instanceof \DateTime) {
+                return $date->format('m/d/Y');
+            }
+        }
+
+        $timestamp = strtotime($value);
+        if ($timestamp !== false) {
+            return date('m/d/Y', $timestamp);
+        }
+
+        return $value;
     }
 
     /**

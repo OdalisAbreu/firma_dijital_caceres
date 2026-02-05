@@ -54,12 +54,13 @@ const aplicarFiltros = () => {
 };
 
 const limpiarFiltros = () => {
-    form.reset();
+    form.cnomcliente = '';
     form.estado_formulario = 'VENCIDO (NO REMITIDO)';
     form.page = 1;
+    form.page_size = 10;
     form.get(route('clientes.kyc-vencidos'), {
-        preserveState: true,
-        preserveScroll: true,
+        preserveState: false,
+        preserveScroll: false,
     });
 };
 
@@ -158,7 +159,7 @@ const kycForm = useForm({
     provincia: '',
     telefono: '',
     ciudadresidencia: '',
-    provinviaresidencia: '',
+    provinciaresidencia: '',
     pais: '',
     telefonoresidencia: '',
     celular: '',
@@ -173,8 +174,11 @@ const kycForm = useForm({
     recursospublicos: '',
     respuestaafirmativauno: '',
     poderpublico: '',
+    poderpublicodescripcion: '',
     personareconocida: '',
+    influenciapublicadescripcion: '',
     afirmativaderespuesta: '',
+    afirmativaderespuestadescripcion: '',
     solicituddeseguro: '',
     fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
 });
@@ -265,6 +269,18 @@ const getNumeroIdentificacion = (cliente) => {
     return '';
 };
 
+const getTipoTercero = (cliente) => {
+    // Determinar el tipo de tercero activo basándose en los campos tipo_tercero_*
+    if (cliente.tipo_tercero_tomador === 1) return 'Tomador';
+    if (cliente.tipo_tercero_asegurado === 1) return 'Asegurado';
+    if (cliente.tipo_tercero_beneficiario === 1) return 'Beneficiario';
+    if (cliente.tipo_tercero_afianzado === 1) return 'Afianzado';
+    if (cliente.tipo_tercero_proveedor === 1) return 'Proveedor';
+    if (cliente.tipo_tercero_empleado === 1) return 'Empleado';
+    if (cliente.tipo_tercero_apoderado === 1) return 'Apoderado';
+    return '';
+};
+
 const enviarKYC = (cliente) => {
     selectedCliente.value = cliente;
     
@@ -281,6 +297,7 @@ const enviarKYC = (cliente) => {
     kycForm.lastname_client = cliente.apellido || '';
     kycForm.email_client = cliente.correo_electronico || '';
     kycForm.sucursal = cliente.sucursal || 'Principal';
+    kycForm.tipo_tercero = getTipoTercero(cliente);
     kycForm.tipodeidentificacion = getTipoIdentificacion(cliente);
     kycForm.numero_identificacion = getNumeroIdentificacion(cliente);
     kycForm.sexo = cliente.sexo || '';
@@ -294,7 +311,7 @@ const enviarKYC = (cliente) => {
     kycForm.telefono = cliente.telefono_empresa || '';
     kycForm.celular = cliente.numero_telefono || '';
     kycForm.ciudadresidencia = cliente.ciudad_recidencia || '';
-    kycForm.provinviaresidencia = cliente.provincia_recidiencia || '';
+    kycForm.provinciaresidencia = cliente.provincia_recidiencia || '';
     kycForm.pais = cliente.pais_recidencia || '';
     kycForm.direccionresidencia = cliente.dirreccion_recidencia || '';
     kycForm.sector = cliente.sector || '';
@@ -306,23 +323,51 @@ const enviarKYC = (cliente) => {
     // Campos adicionales del endpoint de KYC
     kycForm.informacionactividadeconomica = cliente.actividad_economica || '';
     kycForm.informacionfinanciera = cliente.ingesos_mensuales ? String(cliente.ingesos_mensuales) : '';
+    kycForm.direccionparaenviarproductos = getEnviarA(cliente);
     kycForm.otrosingresos = cliente.otros_ingresos ? String(cliente.otros_ingresos) : '';
     kycForm.actividadeconomicadeotrosingresos = cliente.otros_ingresos_actividad || '';
-    // Mapear recursos_publicos: si tiene valor (no null y no vacío), usar "Si", sino "No"
-    kycForm.recursospublicos = (cliente.recursos_publicos && cliente.recursos_publicos !== '') ? 'Si' : '';
-    kycForm.respuestaafirmativauno = cliente.recursos_publicos_descripcion || '';
-    // Mapear poder_publico: si tiene valor (no null y no vacío), usar "Si", sino "No"
-    kycForm.poderpublico = (cliente.poder_publico && cliente.poder_publico !== '') ? 'Si' : '';
-    // Mapear influencia_publica: si tiene valor (no null y no vacío), usar "Si", sino "No"
-    kycForm.personareconocida = (cliente.influencia_publica && cliente.influencia_publica !== '') ? 'Si' : '';
-    // Mapear afirmativo_familia: si tiene valor (no null y no vacío), usar "Si", sino "No"
-    kycForm.afirmativaderespuesta = (cliente.afirmativo_familia && cliente.afirmativo_familia !== '') ? 'Si' : '';
+    // Mapear recursos_publicos
+    if (cliente.recursos_publicos && cliente.recursos_publicos !== '' && cliente.recursos_publicos !== 'No') {
+        kycForm.recursospublicos = 'Si';
+        kycForm.respuestaafirmativauno = cliente.recursos_publicos_descripcion || '';
+    } else if (cliente.recursos_publicos === 'No') {
+        kycForm.recursospublicos = 'No';
+    } else {
+        kycForm.recursospublicos = '';
+    }
+    // Mapear poder_publico
+    if (cliente.poder_publico && cliente.poder_publico !== '' && cliente.poder_publico !== 'No') {
+        kycForm.poderpublico = 'Si';
+        kycForm.poderpublicodescripcion = cliente.poder_publico_descripcion || '';
+    } else if (cliente.poder_publico === 'No') {
+        kycForm.poderpublico = 'No';
+    } else {
+        kycForm.poderpublico = '';
+    }
+    // Mapear influencia_publica
+    if (cliente.influencia_publica && cliente.influencia_publica !== '' && cliente.influencia_publica !== 'No') {
+        kycForm.personareconocida = 'Si';
+        kycForm.influenciapublicadescripcion = cliente.influencia_publica_descripcion || '';
+    } else if (cliente.influencia_publica === 'No') {
+        kycForm.personareconocida = 'No';
+    } else {
+        kycForm.personareconocida = '';
+    }
+    // Mapear afirmativo_familia
+    if (cliente.afirmativo_familia && cliente.afirmativo_familia !== '' && cliente.afirmativo_familia !== 'No') {
+        kycForm.afirmativaderespuesta = 'Si';
+        kycForm.afirmativaderespuestadescripcion = cliente.afirmativo_familia_descripcion || '';
+    } else if (cliente.afirmativo_familia === 'No') {
+        kycForm.afirmativaderespuesta = 'No';
+    } else {
+        kycForm.afirmativaderespuesta = '';
+    }
     // Mapear solicitud de seguro: construir string basado en los campos booleanos
     const solicitudesSeguro = [];
     if (cliente.solicitud_seguro_persona === 1) solicitudesSeguro.push('Personas');
     if (cliente.solicitud_seguro_generales === 1) solicitudesSeguro.push('Generales');
     if (cliente.solicitud_seguro_fianza === 1) solicitudesSeguro.push('Fianza');
-    if (cliente.solicitud_seguro_otros && cliente.solicitud_seguro_otros !== '') {
+    if (cliente.solicitud_seguro_otros && cliente.solicitud_seguro_otros !== '' && cliente.solicitud_seguro_otros !== null) {
         solicitudesSeguro.push(cliente.solicitud_seguro_otros);
     }
     kycForm.solicituddeseguro = solicitudesSeguro.length > 0 ? solicitudesSeguro.join(', ') : '';
@@ -943,12 +988,12 @@ const submitKyc = () => {
 
                                     <!-- Provincia Residencia -->
                                     <div>
-                                        <InputLabel for="provinviaresidencia" value="Provincia Residencia" />
+                                        <InputLabel for="provinciaresidencia" value="Provincia Residencia" />
                                         <TextInput
-                                            id="provinviaresidencia"
+                                            id="provinciaresidencia"
                                             type="text"
                                             class="mt-1 block w-full bg-white dark:bg-gray-900"
-                                            v-model="kycForm.provinviaresidencia"
+                                            v-model="kycForm.provinciaresidencia"
                                         />
                                     </div>
 
@@ -1136,6 +1181,17 @@ const submitKyc = () => {
                                         </select>
                                     </div>
 
+                                    <!-- Descripción Poder Público (si selecciona Si) -->
+                                    <div v-if="kycForm.poderpublico === 'Si'">
+                                        <InputLabel for="poderpublicodescripcion" value="Especifique Poder Público" />
+                                        <TextInput
+                                            id="poderpublicodescripcion"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
+                                            v-model="kycForm.poderpublicodescripcion"
+                                        />
+                                    </div>
+
                                     <!-- Persona Pública -->
                                     <div>
                                         <InputLabel for="personareconocida" value="Persona Pública" />
@@ -1148,6 +1204,17 @@ const submitKyc = () => {
                                             <option value="Si">Si</option>
                                             <option value="No">No</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Descripción Influencia Pública (si selecciona Si) -->
+                                    <div v-if="kycForm.personareconocida === 'Si'">
+                                        <InputLabel for="influenciapublicadescripcion" value="Especifique Influencia Pública" />
+                                        <TextInput
+                                            id="influenciapublicadescripcion"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
+                                            v-model="kycForm.influenciapublicadescripcion"
+                                        />
                                     </div>
 
                                     <!-- Familia Pública -->
@@ -1164,21 +1231,27 @@ const submitKyc = () => {
                                         </select>
                                     </div>
 
+                                    <!-- Descripción Afirmativo Familia (si selecciona Si) -->
+                                    <div v-if="kycForm.afirmativaderespuesta === 'Si'">
+                                        <InputLabel for="afirmativaderespuestadescripcion" value="Especifique Afirmativo Familia" />
+                                        <TextInput
+                                            id="afirmativaderespuestadescripcion"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
+                                            v-model="kycForm.afirmativaderespuestadescripcion"
+                                        />
+                                    </div>
+
                                     <!-- Solicitud de Seguro -->
                                     <div>
                                         <InputLabel for="solicituddeseguro" value="Solicitud de Seguro" />
-                                        <select
+                                        <TextInput
                                             id="solicituddeseguro"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.solicituddeseguro"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
-                                        >
-                                            <option value="">Seleccione...</option>
-                                            <option value="Ramo">Ramo</option>
-                                            <option value="Personas">Personas</option>
-                                            <option value="Generales">Generales</option>
-                                            <option value="Fianza">Fianza</option>
-                                            <option value="Otro">Otro</option>
-                                        </select>
+                                            placeholder="Ej: Personas, Generales, Fianza"
+                                        />
                                     </div>
 
                                     <!-- Fecha -->

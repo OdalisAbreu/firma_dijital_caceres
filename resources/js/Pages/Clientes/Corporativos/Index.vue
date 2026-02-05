@@ -40,7 +40,6 @@ const form = useForm({
     cnomcliente: props.filters.cnomcliente || '',
     crnc: props.filters.crnc || '',
     ccedula: props.filters.ccedula || '',
-    tipo_cliente: props.filters.tipo_cliente || '',
     estatus: props.filters.estatus || '',
     sucursal: props.filters.sucursal || '',
     es_prospecto: props.filters.es_prospecto || '',
@@ -87,13 +86,12 @@ const limpiarFiltros = () => {
     form.cnomcliente = '';
     form.crnc = '';
     form.ccedula = '';
-    form.tipo_cliente = '';
     form.estatus = '';
     form.sucursal = '';
     form.es_prospecto = '';
     form.page = 1;
     form.page_size = 10;
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.index'), {
         preserveState: false,
         preserveScroll: false,
     });
@@ -428,7 +426,7 @@ const getNombreCompleto = (cliente) => {
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold text-secondary">Total de Clientes</h3>
+                                <h3 class="text-lg font-semibold text-secondary">Total de Clientes Corporativos</h3>
                                 <p class="text-3xl font-bold text-primary mt-2">{{ total.toLocaleString() }}</p>
                             </div>
                         </div>
@@ -479,20 +477,6 @@ const getNombreCompleto = (cliente) => {
                                     v-model="form.ccedula"
                                     placeholder="Buscar por cédula..."
                                 />
-                            </div>
-
-                            <!-- Tipo Cliente -->
-                            <div>
-                                <InputLabel for="tipo_cliente" value="Tipo Cliente" />
-                                <select
-                                    id="tipo_cliente"
-                                    v-model="form.tipo_cliente"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                >
-                                    <option v-for="option in tipoClienteOptions" :key="option.value" :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
                             </div>
 
                             <!-- Estatus -->

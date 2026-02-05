@@ -128,7 +128,7 @@ class ClienteController extends Controller
             'provincia' => $request->provincia,
             'telefono' => $request->telefono,
             'ciudadresidencia' => $request->ciudadresidencia,
-            'provinviaresidencia' => $request->provinviaresidencia,
+            'provinciaresidencia' => $request->provinciaresidencia,
             'pais' => $request->pais,
             'telefonoresidencia' => $request->telefonoresidencia,
             'celular' => $request->celular,
@@ -174,6 +174,224 @@ class ClienteController extends Controller
         return back()->withErrors([
             'kyc_error' => $response['error'] ?? 'Error al enviar el formulario KYC',
         ])->withInput();
+    }
+
+    /**
+     * Display a listing of personal clients (PERSONAL and PERSONALES PREMIUM).
+     */
+    public function personales(Request $request)
+    {
+        // Preparar filtros desde la request
+        $filters = [
+            'page' => $request->get('page', 1),
+            'page_size' => $request->get('page_size', 10),
+        ];
+
+        // Agregar filtros opcionales solo si están presentes
+        $optionalFilters = [
+            'cnomcliente',
+            'crnc',
+            'ccedula',
+            'estatus',
+            'sucursal',
+            'es_prospecto',
+        ];
+
+        foreach ($optionalFilters as $filter) {
+            if ($request->has($filter) && $request->get($filter) !== null && $request->get($filter) !== '') {
+                $filters[$filter] = $request->get($filter);
+            }
+        }
+
+        $result = $this->clienteService->getClientesPersonales($filters);
+
+        if (!$result['success']) {
+            return Inertia::render('Clientes/Personales/Index', [
+                'clientes' => null,
+                'total' => 0,
+                'error' => $result['error'] ?? 'Error al obtener los clientes personales',
+                'filters' => $request->only($optionalFilters),
+            ]);
+        }
+
+        $data = $result['data'] ?? [];
+
+        $clientes = [
+            'data' => $data['data'] ?? [],
+            'current_page' => $data['page'] ?? 1,
+            'per_page' => $data['page_size'] ?? 10,
+            'total' => $data['total'] ?? 0,
+            'last_page' => $data['total_pages'] ?? 1,
+        ];
+
+        return Inertia::render('Clientes/Personales/Index', [
+            'clientes' => $clientes,
+            'total' => $data['total'] ?? 0,
+            'filters' => $request->only($optionalFilters),
+        ]);
+    }
+
+    /**
+     * Display a listing of corporate clients (COMERCIAL and CORPORATIVOS).
+     */
+    public function corporativos(Request $request)
+    {
+        // Preparar filtros desde la request
+        $filters = [
+            'page' => $request->get('page', 1),
+            'page_size' => $request->get('page_size', 10),
+        ];
+
+        // Agregar filtros opcionales solo si están presentes
+        $optionalFilters = [
+            'cnomcliente',
+            'crnc',
+            'ccedula',
+            'estatus',
+            'sucursal',
+            'es_prospecto',
+        ];
+
+        foreach ($optionalFilters as $filter) {
+            if ($request->has($filter) && $request->get($filter) !== null && $request->get($filter) !== '') {
+                $filters[$filter] = $request->get($filter);
+            }
+        }
+
+        $result = $this->clienteService->getClientesCorporativos($filters);
+
+        if (!$result['success']) {
+            return Inertia::render('Clientes/Corporativos/Index', [
+                'clientes' => null,
+                'total' => 0,
+                'error' => $result['error'] ?? 'Error al obtener los clientes corporativos',
+                'filters' => $request->only($optionalFilters),
+            ]);
+        }
+
+        $data = $result['data'] ?? [];
+
+        $clientes = [
+            'data' => $data['data'] ?? [],
+            'current_page' => $data['page'] ?? 1,
+            'per_page' => $data['page_size'] ?? 10,
+            'total' => $data['total'] ?? 0,
+            'last_page' => $data['total_pages'] ?? 1,
+        ];
+
+        return Inertia::render('Clientes/Corporativos/Index', [
+            'clientes' => $clientes,
+            'total' => $data['total'] ?? 0,
+            'filters' => $request->only($optionalFilters),
+        ]);
+    }
+
+    /**
+     * Display a listing of personal clients with expired KYC.
+     */
+    public function personalesKycVencidos(Request $request)
+    {
+        // Preparar filtros desde la request
+        $filters = [
+            'page' => $request->get('page', 1),
+            'page_size' => $request->get('page_size', 10),
+        ];
+
+        // Agregar filtros opcionales solo si están presentes
+        $optionalFilters = [
+            'cnomcliente',
+            'estado_formulario',
+        ];
+
+        foreach ($optionalFilters as $filter) {
+            if ($request->has($filter) && $request->get($filter) !== null && $request->get($filter) !== '') {
+                $filters[$filter] = $request->get($filter);
+            }
+        }
+
+        // Consumir el servicio
+        $result = $this->clienteService->getClientesKycVencidosPersonales($filters);
+
+        if (!$result['success']) {
+            return Inertia::render('Clientes/Personales/KycVencidos', [
+                'clientes' => null,
+                'total' => 0,
+                'error' => $result['error'] ?? 'Error al obtener los clientes personales con KYC vencidos',
+                'filters' => $request->only($optionalFilters),
+                'totalesPorEstado' => [],
+            ]);
+        }
+
+        $data = $result['data'] ?? [];
+
+        $clientes = [
+            'data' => $data['data'] ?? [],
+            'current_page' => $data['page'] ?? 1,
+            'per_page' => $data['page_size'] ?? 10,
+            'total' => $data['total'] ?? 0,
+            'last_page' => $data['total_pages'] ?? 1,
+        ];
+
+        return Inertia::render('Clientes/Personales/KycVencidos', [
+            'clientes' => $clientes,
+            'total' => $data['total'] ?? 0,
+            'filters' => $request->only($optionalFilters),
+            'totalesPorEstado' => $data['totales_por_estado'] ?? [],
+        ]);
+    }
+
+    /**
+     * Display a listing of corporate clients with expired KYC.
+     */
+    public function corporativosKycVencidos(Request $request)
+    {
+        // Preparar filtros desde la request
+        $filters = [
+            'page' => $request->get('page', 1),
+            'page_size' => $request->get('page_size', 10),
+        ];
+
+        // Agregar filtros opcionales solo si están presentes
+        $optionalFilters = [
+            'cnomcliente',
+            'estado_formulario',
+        ];
+
+        foreach ($optionalFilters as $filter) {
+            if ($request->has($filter) && $request->get($filter) !== null && $request->get($filter) !== '') {
+                $filters[$filter] = $request->get($filter);
+            }
+        }
+
+        // Consumir el servicio
+        $result = $this->clienteService->getClientesKycVencidosCorporativos($filters);
+
+        if (!$result['success']) {
+            return Inertia::render('Clientes/Corporativos/KycVencidos', [
+                'clientes' => null,
+                'total' => 0,
+                'error' => $result['error'] ?? 'Error al obtener los clientes corporativos con KYC vencidos',
+                'filters' => $request->only($optionalFilters),
+                'totalesPorEstado' => [],
+            ]);
+        }
+
+        $data = $result['data'] ?? [];
+
+        $clientes = [
+            'data' => $data['data'] ?? [],
+            'current_page' => $data['page'] ?? 1,
+            'per_page' => $data['page_size'] ?? 10,
+            'total' => $data['total'] ?? 0,
+            'last_page' => $data['total_pages'] ?? 1,
+        ];
+
+        return Inertia::render('Clientes/Corporativos/KycVencidos', [
+            'clientes' => $clientes,
+            'total' => $data['total'] ?? 0,
+            'filters' => $request->only($optionalFilters),
+            'totalesPorEstado' => $data['totales_por_estado'] ?? [],
+        ]);
     }
 
     /**

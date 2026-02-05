@@ -5,17 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue';
-
-const page = usePage();
-
-const userDisplay = computed(() => {
-    const user = page.props.auth?.user;
-    if (user && user.name && user.email) {
-        return `${user.name} - ${user.email}`;
-    }
-    return '';
-});
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     clientes: {
@@ -34,50 +24,30 @@ const props = defineProps({
         type: String,
         default: null,
     },
+    totalesPorEstado: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const form = useForm({
     cnomcliente: props.filters.cnomcliente || '',
-    crnc: props.filters.crnc || '',
-    ccedula: props.filters.ccedula || '',
-    tipo_cliente: props.filters.tipo_cliente || '',
-    estatus: props.filters.estatus || '',
-    sucursal: props.filters.sucursal || '',
-    es_prospecto: props.filters.es_prospecto || '',
+    estado_formulario: props.filters.estado_formulario || 'VENCIDO (NO REMITIDO)',
     page: 1,
     page_size: 10,
 });
 
-const tipoClienteOptions = [
-    { value: '', label: 'Todos' },
-    { value: 'PERSONAL', label: 'PERSONAL' },
-    { value: 'PERSONALES PREMIUM', label: 'PERSONALES PREMIUM' },
-    { value: 'COMERCIAL', label: 'COMERCIAL' },
-    { value: 'CORPORATIVOS', label: 'CORPORATIVOS' },
-];
-
-const estatusOptions = [
-    { value: '', label: 'Todos' },
-    { value: 'A', label: 'Activo' },
-    { value: 'I', label: 'Inactivo' },
-];
-
-const sucursalOptions = [
-    { value: '', label: 'Todas' },
-    { value: 'Principal', label: 'Principal' },
-    { value: 'Romana', label: 'Romana' },
-    { value: 'Punta Cana', label: 'Punta Cana' },
-];
-
-const tipoOptions = [
-    { value: '', label: 'Todos' },
-    { value: 'C', label: 'Cliente' },
-    { value: 'P', label: 'Prospecto' },
+const estadoFormularioOptions = [
+    { value: 'VENCIDO (NO REMITIDO)', label: 'Vencido (No Remitido)' },
+    { value: 'VENCIDO', label: 'Vencido' },
+    { value: 'VIGENTE', label: 'Vigente' },
+    { value: 'PENDIENTE DE REMISION', label: 'Pendiente de Remisión' },
+    { value: 'SIN CLASIFICAR', label: 'Sin Clasificar' },
 ];
 
 const aplicarFiltros = () => {
     form.page = 1; // Resetear a la primera página
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.kyc-vencidos'), {
         preserveState: true,
         preserveScroll: true,
     });
@@ -85,15 +55,10 @@ const aplicarFiltros = () => {
 
 const limpiarFiltros = () => {
     form.cnomcliente = '';
-    form.crnc = '';
-    form.ccedula = '';
-    form.tipo_cliente = '';
-    form.estatus = '';
-    form.sucursal = '';
-    form.es_prospecto = '';
+    form.estado_formulario = 'VENCIDO (NO REMITIDO)';
     form.page = 1;
     form.page_size = 10;
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.kyc-vencidos'), {
         preserveState: false,
         preserveScroll: false,
     });
@@ -101,7 +66,7 @@ const limpiarFiltros = () => {
 
 const cambiarPagina = (page) => {
     form.page = page;
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.kyc-vencidos'), {
         preserveState: true,
         preserveScroll: true,
     });
@@ -110,11 +75,64 @@ const cambiarPagina = (page) => {
 const cambiarPageSize = (newSize) => {
     form.page_size = newSize;
     form.page = 1; // Resetear a la primera página
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.kyc-vencidos'), {
         preserveState: true,
         preserveScroll: true,
     });
 };
+
+const getCedulaRncPasaporte = (cliente) => {
+    if (cliente.cedula) {
+        return cliente.cedula;
+    }
+    if (cliente.rnc) {
+        return cliente.rnc;
+    }
+    if (cliente.pasaporte) {
+        return cliente.pasaporte;
+    }
+    return '-';
+};
+
+const getNombreCompleto = (cliente) => {
+    return `${cliente.nombre || ''} ${cliente.apellido || ''}`.trim();
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        });
+    } catch {
+        return dateString;
+    }
+};
+
+const getEstadoBadgeClass = (estado) => {
+    const estadoLower = estado?.toLowerCase() || '';
+    if (estadoLower.includes('vencido')) {
+        return 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+    } else if (estadoLower.includes('vigente')) {
+        return 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+    } else if (estadoLower.includes('pendiente')) {
+        return 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+    }
+    return 'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+};
+
+const page = usePage();
+
+const userDisplay = computed(() => {
+    const user = page.props.auth?.user;
+    if (user && user.name && user.email) {
+        return `${user.name} - ${user.email}`;
+    }
+    return '';
+});
 
 const showModal = ref(false);
 const selectedCliente = ref(null);
@@ -311,11 +329,14 @@ const enviarKYC = (cliente) => {
     kycForm.ciudaddenacimiento = cliente.ciudad_nacimiento || '';
     kycForm.provinciadenacimiento = cliente.porvincia_nacimiento || '';
     kycForm.nacionalidad = cliente.nacionalidad || '';
-    kycForm.fechadevencimiento = formatDateForInput(cliente.fecha_vencimiento);
-    // Campos adicionales del endpoint
+    // Usar fecha_venc_form si existe (fecha de vencimiento del formulario), sino usar fecha_vencimiento (fecha de vencimiento de identificación)
+    kycForm.fechadevencimiento = formatDateForInput(cliente.fecha_venc_form || cliente.fecha_vencimiento);
+    // Campos adicionales del endpoint de KYC
     kycForm.informacionactividadeconomica = cliente.actividad_economica || '';
     kycForm.informacionfinanciera = cliente.ingesos_mensuales ? String(cliente.ingesos_mensuales) : '';
     kycForm.direccionparaenviarproductos = getEnviarA(cliente);
+    kycForm.otrosingresos = cliente.otros_ingresos ? String(cliente.otros_ingresos) : '';
+    kycForm.actividadeconomicadeotrosingresos = cliente.otros_ingresos_actividad || '';
     // Mapear recursos_publicos
     if (cliente.recursos_publicos && cliente.recursos_publicos !== '' && cliente.recursos_publicos !== 'No') {
         kycForm.recursospublicos = 'Si';
@@ -385,153 +406,81 @@ const submitKyc = () => {
         },
     });
 };
-
-const getCedulaRnc = (cliente) => {
-    if (cliente.cedula) {
-        return cliente.cedula;
-    }
-    if (cliente.rnc) {
-        return cliente.rnc;
-    }
-    return '-';
-};
-
-const getEstatusLabel = (estatus) => {
-    if (!estatus) return 'N/A';
-    return estatus === 'C' ? 'Cliente' : estatus === 'P' ? 'Prospecto' : estatus;
-};
-
-const getEstatusClass = (estatus) => {
-    if (!estatus) return 'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800';
-    return estatus === 'C' 
-        ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' 
-        : 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800';
-};
-
-const getNombreCompleto = (cliente) => {
-    return `${cliente.nombre} ${cliente.apellido}`.trim();
-};
 </script>
 
 <template>
-    <Head title="Clientes" />
+    <Head title="Clientes con KYC Vencidos" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-secondary leading-tight">Gestión de Clientes</h2>
+            <h2 class="font-semibold text-xl text-secondary leading-tight">Clientes con KYC Vencidos</h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Resumen -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold text-secondary">Total de Clientes</h3>
+                                <h3 class="text-lg font-semibold text-secondary dark:text-white">Total de Clientes Corporativos con KYC Vencidos</h3>
                                 <p class="text-3xl font-bold text-primary mt-2">{{ total.toLocaleString() }}</p>
+                            </div>
+                            <div v-if="totalesPorEstado && Object.keys(totalesPorEstado).length > 0" class="text-right">
+                                <h4 class="text-sm font-semibold text-secondary dark:text-white mb-2">Totales por Estado:</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div v-if="totalesPorEstado.vigente !== undefined">
+                                        <span class="text-green-600 dark:text-green-400">Vigente:</span> {{ totalesPorEstado.vigente }}
+                                    </div>
+                                    <div v-if="totalesPorEstado.vencido !== undefined">
+                                        <span class="text-red-600 dark:text-red-400">Vencido:</span> {{ totalesPorEstado.vencido }}
+                                    </div>
+                                    <div v-if="totalesPorEstado.vencido_no_remitido !== undefined">
+                                        <span class="text-red-600 dark:text-red-400">Vencido (No Remitido):</span> {{ totalesPorEstado.vencido_no_remitido }}
+                                    </div>
+                                    <div v-if="totalesPorEstado.pendiente_de_remision !== undefined">
+                                        <span class="text-yellow-600 dark:text-yellow-400">Pendiente de Remisión:</span> {{ totalesPorEstado.pendiente_de_remision }}
+                                    </div>
+                                    <div v-if="totalesPorEstado.sin_clasificar !== undefined">
+                                        <span class="text-gray-600 dark:text-gray-400">Sin Clasificar:</span> {{ totalesPorEstado.sin_clasificar }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Filtros -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-secondary mb-4">Filtros de Búsqueda</h3>
+                        <h3 class="text-lg font-semibold text-secondary dark:text-white mb-4">Filtros de Búsqueda</h3>
                         
-                        <div v-if="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                        <div v-if="error" class="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded">
                             {{ error }}
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Nombre -->
                             <div>
                                 <InputLabel for="cnomcliente" value="Nombre (Parcial)" />
                                 <TextInput
                                     id="cnomcliente"
                                     type="text"
-                                    class="mt-1 block w-full bg-white"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-900"
                                     v-model="form.cnomcliente"
                                     placeholder="Buscar por nombre..."
                                 />
                             </div>
 
-                            <!-- RNC -->
+                            <!-- Estado Formulario -->
                             <div>
-                                <InputLabel for="crnc" value="RNC (Parcial)" />
-                                <TextInput
-                                    id="crnc"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white"
-                                    v-model="form.crnc"
-                                    placeholder="Buscar por RNC..."
-                                />
-                            </div>
-
-                            <!-- Cédula -->
-                            <div>
-                                <InputLabel for="ccedula" value="Cédula (Parcial)" />
-                                <TextInput
-                                    id="ccedula"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white"
-                                    v-model="form.ccedula"
-                                    placeholder="Buscar por cédula..."
-                                />
-                            </div>
-
-                            <!-- Tipo Cliente -->
-                            <div>
-                                <InputLabel for="tipo_cliente" value="Tipo Cliente" />
+                                <InputLabel for="estado_formulario" value="Estado del Formulario" />
                                 <select
-                                    id="tipo_cliente"
-                                    v-model="form.tipo_cliente"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                    id="estado_formulario"
+                                    v-model="form.estado_formulario"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                 >
-                                    <option v-for="option in tipoClienteOptions" :key="option.value" :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- Estatus -->
-                            <div>
-                                <InputLabel for="estatus" value="Estatus" />
-                                <select
-                                    id="estatus"
-                                    v-model="form.estatus"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                >
-                                    <option v-for="option in estatusOptions" :key="option.value" :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- Sucursal -->
-                            <div>
-                                <InputLabel for="sucursal" value="Sucursal" />
-                                <select
-                                    id="sucursal"
-                                    v-model="form.sucursal"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                >
-                                    <option v-for="option in sucursalOptions" :key="option.value" :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- Tipo -->
-                            <div>
-                                <InputLabel for="es_prospecto" value="Tipo" />
-                                <select
-                                    id="es_prospecto"
-                                    v-model="form.es_prospecto"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                >
-                                    <option v-for="option in tipoOptions" :key="option.value" :value="option.value">
+                                    <option v-for="option in estadoFormularioOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}
                                     </option>
                                 </select>
@@ -548,7 +497,7 @@ const getNombreCompleto = (cliente) => {
                             </PrimaryButton>
                             <button
                                 @click="limpiarFiltros"
-                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 :disabled="form.processing"
                             >
                                 <LoadingSpinner v-if="form.processing" size="sm" color="gray" />
@@ -559,53 +508,59 @@ const getNombreCompleto = (cliente) => {
                 </div>
 
                 <!-- Tabla -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 relative">
                         <!-- Loading Overlay -->
                         <div
                             v-if="form.processing && (!clientes || !clientes.data || clientes.data.length === 0)"
-                            class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10"
+                            class="absolute inset-0 bg-white dark:bg-gray-800 bg-opacity-75 flex items-center justify-center z-10"
                         >
                             <div class="flex flex-col items-center gap-3">
                                 <LoadingSpinner size="lg" color="primary" />
-                                <p class="text-secondary">Cargando clientes...</p>
+                                <p class="text-secondary dark:text-white">Cargando clientes...</p>
                             </div>
                         </div>
 
                         <div v-if="!form.processing && (!clientes || !clientes.data || clientes.data.length === 0)" class="text-center py-8">
-                            <p class="text-gray-500">No se encontraron clientes con los filtros aplicados.</p>
+                            <p class="text-gray-500 dark:text-gray-400">No se encontraron clientes con los filtros aplicados.</p>
                         </div>
 
                         <div v-else class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-secondary">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" style="max-width: 150px; width: 150px;">
                                             Nombre
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                            Cédula/RNC
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                            Estatus
+                                            Identificación
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" style="max-width: 150px; width: 150px;">
-                                            Correo
+                                            Email
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                            Tipo Cliente
+                                            Estado Formulario
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                            Sucursal
+                                            Fecha Vencimiento
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                            Días hasta Vencimiento
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Acciones
                                         </th>
+                                      <!--  <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                            Form. Remitido
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                            Form. Recibido
+                                        </th>-->
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="cliente in clientes.data" :key="cliente.id_client" class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 text-sm text-secondary" style="max-width: 250px; width: 250px;">
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="cliente in clientes.data" :key="cliente.id_client" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td class="px-6 py-4 text-sm text-secondary dark:text-gray-300" style="max-width: 200px; width: 200px;">
                                             <div 
                                                 class="truncate" 
                                                 :title="getNombreCompleto(cliente)"
@@ -613,15 +568,10 @@ const getNombreCompleto = (cliente) => {
                                                 {{ getNombreCompleto(cliente) }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                                            {{ getCedulaRnc(cliente) }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
+                                            {{ getCedulaRncPasaporte(cliente) }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span :class="getEstatusClass(cliente.estatus)">
-                                                {{ getEstatusLabel(cliente.estatus) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-accent" style="max-width: 150px; width: 150px;">
+                                        <td class="px-6 py-4 text-sm text-accent dark:text-blue-400" style="max-width: 200px; width: 200px;">
                                             <div 
                                                 class="truncate" 
                                                 :title="cliente.correo_electronico || '-'"
@@ -629,11 +579,24 @@ const getNombreCompleto = (cliente) => {
                                                 {{ cliente.correo_electronico || '-' }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                                            {{ cliente.tipo_cliente }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span :class="getEstadoBadgeClass(cliente.estado_formulario)">
+                                                {{ cliente.estado_formulario || 'N/A' }}
+                                            </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                                            {{ cliente.sucursal }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
+                                            {{ formatDate(cliente.fecha_venc_form) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span 
+                                                :class="{
+                                                    'text-red-600 dark:text-red-400 font-semibold': cliente.dias_hasta_vencimiento < 0,
+                                                    'text-yellow-600 dark:text-yellow-400 font-semibold': cliente.dias_hasta_vencimiento >= 0 && cliente.dias_hasta_vencimiento <= 30,
+                                                    'text-green-600 dark:text-green-400': cliente.dias_hasta_vencimiento > 30
+                                                }"
+                                            >
+                                                {{ cliente.dias_hasta_vencimiento !== undefined ? cliente.dias_hasta_vencimiento : 'N/A' }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button
@@ -643,6 +606,12 @@ const getNombreCompleto = (cliente) => {
                                                 Enviar KYC
                                             </button>
                                         </td>
+                                       <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
+                                            {{ cliente.formremitido === 1 ? 'Sí' : 'No' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
+                                            {{ cliente.formrecibido === 1 ? 'Sí' : 'No' }}
+                                        </td>-->
                                     </tr>
                                 </tbody>
                             </table>
@@ -651,14 +620,14 @@ const getNombreCompleto = (cliente) => {
                         <!-- Paginación -->
                         <div v-if="clientes && clientes.data && clientes.data.length > 0" class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                             <div class="flex items-center gap-2">
-                                <label for="page_size" class="text-sm text-secondary">Registros por página:</label>
+                                <label for="page_size" class="text-sm text-secondary dark:text-white">Registros por página:</label>
                                 <div class="relative">
                                     <select
                                         id="page_size"
                                         v-model="form.page_size"
                                         @change="cambiarPageSize(form.page_size)"
                                         :disabled="form.processing"
-                                        class="px-6 py-2 border border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        class="px-6 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <option value="10">10</option>
                                         <option value="30">30</option>
@@ -678,13 +647,13 @@ const getNombreCompleto = (cliente) => {
                                 <button
                                     @click="cambiarPagina(clientes.current_page - 1)"
                                     :disabled="clientes.current_page <= 1 || form.processing"
-                                    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     <LoadingSpinner v-if="form.processing && clientes.current_page > 1" size="sm" color="gray" />
                                     Anterior
                                 </button>
                                 
-                                <span class="px-4 py-2 text-sm text-secondary">
+                                <span class="px-4 py-2 text-sm text-secondary dark:text-white">
                                     <span v-if="form.processing" class="flex items-center gap-2">
                                         <LoadingSpinner size="sm" color="gray" />
                                         Cargando...
@@ -697,7 +666,7 @@ const getNombreCompleto = (cliente) => {
                                 <button
                                     @click="cambiarPagina(clientes.current_page + 1)"
                                     :disabled="clientes.current_page >= clientes.last_page || form.processing"
-                                    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     Siguiente
                                     <LoadingSpinner v-if="form.processing && clientes.current_page < clientes.last_page" size="sm" color="gray" />
@@ -726,13 +695,13 @@ const getNombreCompleto = (cliente) => {
                 <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                     <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="cerrarModal"></div>
 
-                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[90vh] overflow-y-auto">
+                    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[90vh] overflow-y-auto">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-medium text-secondary">Enviar Formulario KYC</h3>
+                                <h3 class="text-lg font-medium text-secondary dark:text-white">Enviar Formulario KYC</h3>
                                 <button
                                     @click="cerrarModal"
-                                    class="text-gray-400 hover:text-gray-500"
+                                    class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                                 >
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -740,28 +709,15 @@ const getNombreCompleto = (cliente) => {
                                 </button>
                             </div>
 
-                            <div v-if="$page.props.flash?.success" class="mb-4 p-4 bg-green-100 text-green-700 rounded">
+                            <div v-if="$page.props.flash?.success" class="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded">
                                 {{ $page.props.flash.success }}
                             </div>
 
-                            <div v-if="$page.props.errors?.kyc_error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                            <div v-if="$page.props.errors?.kyc_error" class="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded">
                                 {{ $page.props.errors.kyc_error }}
                             </div>
 
                             <form @submit.prevent="submitKyc" class="space-y-4">
-                                <!-- Empleado (ancho completo) -->
-                                <!--<div>
-                                    <InputLabel for="user_name" value="Usuario" />
-                                    <TextInput
-                                        id="user_name"
-                                        type="text"
-                                        class="mt-1 block w-full bg-gray-100 dark:bg-gray-700"
-                                        :value="userDisplay"
-                                        readonly
-                                        disabled
-                                    />
-                                </div> -->
-
                                 <!-- Campos Obligatorios -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <!-- Tipo de Persona * -->
@@ -770,14 +726,14 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="tipo_persona"
                                             v-model="kycForm.tipo_persona"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                             required
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="fisica">Persona Física</option>
                                             <option value="juridica">Persona Jurídica</option>
                                         </select>
-                                        <span v-if="kycForm.errors.tipo_persona" class="text-red-600 text-sm">{{ kycForm.errors.tipo_persona }}</span>
+                                        <span v-if="kycForm.errors.tipo_persona" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.tipo_persona }}</span>
                                     </div>
 
                                     <!-- Tipo de Tercero * -->
@@ -786,7 +742,7 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="tipo_tercero"
                                             v-model="kycForm.tipo_tercero"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                             required
                                         >
                                             <option value="">Seleccione...</option>
@@ -798,7 +754,7 @@ const getNombreCompleto = (cliente) => {
                                             <option value="Empleado">Empleado</option>
                                             <option value="Apoderado">Apoderado</option>
                                         </select>
-                                        <span v-if="kycForm.errors.tipo_tercero" class="text-red-600 text-sm">{{ kycForm.errors.tipo_tercero }}</span>
+                                        <span v-if="kycForm.errors.tipo_tercero" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.tipo_tercero }}</span>
                                     </div>
 
                                     <!-- Sucursal * -->
@@ -807,7 +763,7 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="sucursal"
                                             v-model="kycForm.sucursal"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                             required
                                         >
                                             <option value="">Seleccione...</option>
@@ -815,7 +771,7 @@ const getNombreCompleto = (cliente) => {
                                             <option value="Romana">Romana</option>
                                             <option value="Punta Cana">Punta Cana</option>
                                         </select>
-                                        <span v-if="kycForm.errors.sucursal" class="text-red-600 text-sm">{{ kycForm.errors.sucursal }}</span>
+                                        <span v-if="kycForm.errors.sucursal" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.sucursal }}</span>
                                     </div>
 
                                     <!-- Tipo de Identificación * -->
@@ -824,7 +780,7 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="tipodeidentificacion"
                                             v-model="kycForm.tipodeidentificacion"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                             required
                                         >
                                             <option value="">Seleccione...</option>
@@ -832,7 +788,7 @@ const getNombreCompleto = (cliente) => {
                                             <option value="RNC">RNC</option>
                                             <option value="Pasaporte">Pasaporte</option>
                                         </select>
-                                        <span v-if="kycForm.errors.tipodeidentificacion" class="text-red-600 text-sm">{{ kycForm.errors.tipodeidentificacion }}</span>
+                                        <span v-if="kycForm.errors.tipodeidentificacion" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.tipodeidentificacion }}</span>
                                     </div>
 
                                     <!-- Número * -->
@@ -841,11 +797,11 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="numero_identificacion"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.numero_identificacion"
                                             required
                                         />
-                                        <span v-if="kycForm.errors.numero_identificacion" class="text-red-600 text-sm">{{ kycForm.errors.numero_identificacion }}</span>
+                                        <span v-if="kycForm.errors.numero_identificacion" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.numero_identificacion }}</span>
                                     </div>
 
                                     <!-- Fecha de Vencimiento * -->
@@ -854,11 +810,11 @@ const getNombreCompleto = (cliente) => {
                                         <input
                                             id="fechadevencimiento"
                                             type="date"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                             v-model="fechadevencimientoDate"
                                             required
                                         />
-                                        <span v-if="kycForm.errors.fechadevencimiento" class="text-red-600 text-sm">{{ kycForm.errors.fechadevencimiento }}</span>
+                                        <span v-if="kycForm.errors.fechadevencimiento" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.fechadevencimiento }}</span>
                                     </div>
 
                                     <!-- Nombres * -->
@@ -867,11 +823,11 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="name_client"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.name_client"
                                             required
                                         />
-                                        <span v-if="kycForm.errors.name_client" class="text-red-600 text-sm">{{ kycForm.errors.name_client }}</span>
+                                        <span v-if="kycForm.errors.name_client" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.name_client }}</span>
                                     </div>
 
                                     <!-- Apellidos * -->
@@ -880,11 +836,11 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="lastname_client"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.lastname_client"
                                             required
                                         />
-                                        <span v-if="kycForm.errors.lastname_client" class="text-red-600 text-sm">{{ kycForm.errors.lastname_client }}</span>
+                                        <span v-if="kycForm.errors.lastname_client" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.lastname_client }}</span>
                                     </div>
 
                                     <!-- Sexo * -->
@@ -893,26 +849,26 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="sexo"
                                             v-model="kycForm.sexo"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                             required
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="M">Masculino</option>
                                             <option value="F">Femenino</option>
                                         </select>
-                                        <span v-if="kycForm.errors.sexo" class="text-red-600 text-sm">{{ kycForm.errors.sexo }}</span>
+                                        <span v-if="kycForm.errors.sexo" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.sexo }}</span>
                                     </div>
 
-                                    <!-- Fecha de Nacimiento * -->
+                                    <!-- Fecha de Nacimiento -->
                                     <div>
                                         <InputLabel for="fechanacimiento" value="Fecha de Nacimiento" />
                                         <input
                                             id="fechanacimiento"
                                             type="date"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                            v-model="fechanacimientoDate"                                            
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                            v-model="fechanacimientoDate"
                                         />
-                                        <span v-if="kycForm.errors.fechanacimiento" class="text-red-600 text-sm">{{ kycForm.errors.fechanacimiento }}</span>
+                                        <span v-if="kycForm.errors.fechanacimiento" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.fechanacimiento }}</span>
                                     </div>
 
                                     <!-- Ciudad de Nacimiento -->
@@ -921,7 +877,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="ciudaddenacimiento"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.ciudaddenacimiento"
                                         />
                                     </div>
@@ -932,7 +888,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="provinciadenacimiento"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.provinciadenacimiento"
                                         />
                                     </div>
@@ -943,57 +899,57 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="nacionalidad"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.nacionalidad"
                                         />
                                     </div>
 
-                                    <!-- Profesión * -->
+                                    <!-- Profesión -->
                                     <div>
                                         <InputLabel for="profesion" value="Profesión" />
                                         <TextInput
                                             id="profesion"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.profesion"
                                         />
-                                        <span v-if="kycForm.errors.profesion" class="text-red-600 text-sm">{{ kycForm.errors.profesion }}</span>
+                                        <span v-if="kycForm.errors.profesion" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.profesion }}</span>
                                     </div>
 
-                                    <!-- Ocupación/Cargo * -->
+                                    <!-- Ocupación/Cargo -->
                                     <div>
                                         <InputLabel for="ocupacioncargo" value="Ocupación/Cargo" />
                                         <TextInput
                                             id="ocupacioncargo"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.ocupacioncargo"
                                         />
-                                        <span v-if="kycForm.errors.ocupacioncargo" class="text-red-600 text-sm">{{ kycForm.errors.ocupacioncargo }}</span>
+                                        <span v-if="kycForm.errors.ocupacioncargo" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.ocupacioncargo }}</span>
                                     </div>
 
-                                    <!-- Empresa * -->
+                                    <!-- Empresa -->
                                     <div>
                                         <InputLabel for="empresa" value="Empresa" />
                                         <TextInput
                                             id="empresa"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.empresa"
                                         />
-                                        <span v-if="kycForm.errors.empresa" class="text-red-600 text-sm">{{ kycForm.errors.empresa }}</span>
+                                        <span v-if="kycForm.errors.empresa" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.empresa }}</span>
                                     </div>
 
-                                    <!-- Dirección donde labora * -->
+                                    <!-- Dirección donde labora -->
                                     <div>
                                         <InputLabel for="direcciondondelabora" value="Dirección donde labora" />
                                         <TextInput
                                             id="direcciondondelabora"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.direcciondondelabora"
                                         />
-                                        <span v-if="kycForm.errors.direcciondondelabora" class="text-red-600 text-sm">{{ kycForm.errors.direcciondondelabora }}</span>
+                                        <span v-if="kycForm.errors.direcciondondelabora" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.direcciondondelabora }}</span>
                                     </div>
 
                                     <!-- Ciudad -->
@@ -1002,7 +958,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="ciudad"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.ciudad"
                                         />
                                     </div>
@@ -1013,22 +969,21 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="provincia"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.provincia"
                                         />
                                     </div>
-                                    
 
-                                    <!-- Teléfono * -->
+                                    <!-- Teléfono -->
                                     <div>
                                         <InputLabel for="telefono" value="Teléfono" />
                                         <TextInput
                                             id="telefono"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.telefono"
                                         />
-                                        <span v-if="kycForm.errors.telefono" class="text-red-600 text-sm">{{ kycForm.errors.telefono }}</span>
+                                        <span v-if="kycForm.errors.telefono" class="text-red-600 dark:text-red-400 text-sm">{{ kycForm.errors.telefono }}</span>
                                     </div>
 
                                     <!-- Ciudad Residencia -->
@@ -1037,7 +992,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="ciudadresidencia"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.ciudadresidencia"
                                         />
                                     </div>
@@ -1048,7 +1003,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="provinciaresidencia"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.provinciaresidencia"
                                         />
                                     </div>
@@ -1059,7 +1014,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="pais"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.pais"
                                         />
                                     </div>
@@ -1070,7 +1025,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="telefonoresidencia"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.telefonoresidencia"
                                         />
                                     </div>
@@ -1081,7 +1036,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="celular"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.celular"
                                         />
                                     </div>
@@ -1092,7 +1047,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="direccionresidencia"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.direccionresidencia"
                                         />
                                     </div>
@@ -1103,7 +1058,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="sector"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.sector"
                                         />
                                     </div>
@@ -1114,7 +1069,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="correoelectronico"
                                             type="email"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.email_client"
                                         />
                                     </div>
@@ -1125,14 +1080,12 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="direccionparaenviarproductos"
                                             v-model="kycForm.direccionparaenviarproductos"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                         >
                                             <option value="">Seleccione...</option>
-                                            <option value="Correo Electrónico">Correo Electrónico</option>
-                                            <option value="Domicilio">Domicilio</option>
-                                            <option value="Oficina principal">Oficina principal</option>
-                                            <option value="Reticencia">Reticencia</option>
                                             <option value="Trabajo">Trabajo</option>
+                                            <option value="Correo electrónico">Correo electrónico</option>
+                                            <option value="Residencia">Residencia</option>
                                         </select>
                                     </div>
 
@@ -1142,7 +1095,7 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="informacionactividadeconomica"
                                             v-model="kycForm.informacionactividadeconomica"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="Empleado/Asalariado">Empleado/Asalariado</option>
@@ -1162,7 +1115,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="otroactividadeconomica"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.otroactividadeconomica"
                                         />
                                     </div>
@@ -1173,7 +1126,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="informacionfinanciera"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.informacionfinanciera"
                                         />
                                     </div>
@@ -1184,7 +1137,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="otrosingresos"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.otrosingresos"
                                         />
                                     </div>
@@ -1195,7 +1148,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="actividadeconomicadeotrosingresos"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.actividadeconomicadeotrosingresos"
                                         />
                                     </div>
@@ -1206,7 +1159,7 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="recursospublicos"
                                             v-model="kycForm.recursospublicos"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="Si">Si</option>
@@ -1220,7 +1173,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="respuestaafirmativauno"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.respuestaafirmativauno"
                                         />
                                     </div>
@@ -1231,12 +1184,23 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="poderpublico"
                                             v-model="kycForm.poderpublico"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="Si">Si</option>
                                             <option value="No">No</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Descripción Poder Público (si selecciona Si) -->
+                                    <div v-if="kycForm.poderpublico === 'Si'">
+                                        <InputLabel for="poderpublicodescripcion" value="Especifique Poder Público" />
+                                        <TextInput
+                                            id="poderpublicodescripcion"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
+                                            v-model="kycForm.poderpublicodescripcion"
+                                        />
                                     </div>
 
                                     <!-- Persona Pública -->
@@ -1245,12 +1209,23 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="personareconocida"
                                             v-model="kycForm.personareconocida"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="Si">Si</option>
                                             <option value="No">No</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Descripción Influencia Pública (si selecciona Si) -->
+                                    <div v-if="kycForm.personareconocida === 'Si'">
+                                        <InputLabel for="influenciapublicadescripcion" value="Especifique Influencia Pública" />
+                                        <TextInput
+                                            id="influenciapublicadescripcion"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
+                                            v-model="kycForm.influenciapublicadescripcion"
+                                        />
                                     </div>
 
                                     <!-- Familia Pública -->
@@ -1259,12 +1234,23 @@ const getNombreCompleto = (cliente) => {
                                         <select
                                             id="afirmativaderespuesta"
                                             v-model="kycForm.afirmativaderespuesta"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
                                         >
                                             <option value="">Seleccione...</option>
                                             <option value="Si">Si</option>
                                             <option value="No">No</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Descripción Afirmativo Familia (si selecciona Si) -->
+                                    <div v-if="kycForm.afirmativaderespuesta === 'Si'">
+                                        <InputLabel for="afirmativaderespuestadescripcion" value="Especifique Afirmativo Familia" />
+                                        <TextInput
+                                            id="afirmativaderespuestadescripcion"
+                                            type="text"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
+                                            v-model="kycForm.afirmativaderespuestadescripcion"
+                                        />
                                     </div>
 
                                     <!-- Solicitud de Seguro -->
@@ -1273,7 +1259,7 @@ const getNombreCompleto = (cliente) => {
                                         <TextInput
                                             id="solicituddeseguro"
                                             type="text"
-                                            class="mt-1 block w-full"
+                                            class="mt-1 block w-full bg-white dark:bg-gray-900"
                                             v-model="kycForm.solicituddeseguro"
                                             placeholder="Ej: Personas, Generales, Fianza"
                                         />
@@ -1285,7 +1271,7 @@ const getNombreCompleto = (cliente) => {
                                         <input
                                             id="fecha"
                                             type="date"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-gray-100"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-gray-100 dark:bg-gray-700"
                                             v-model="fechaDate"
                                             readonly
                                         />
@@ -1297,7 +1283,7 @@ const getNombreCompleto = (cliente) => {
                                     <button
                                         type="button"
                                         @click="cerrarModal"
-                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
                                     >
                                         Cancelar
                                     </button>

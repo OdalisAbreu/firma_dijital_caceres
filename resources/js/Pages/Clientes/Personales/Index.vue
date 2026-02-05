@@ -40,7 +40,6 @@ const form = useForm({
     cnomcliente: props.filters.cnomcliente || '',
     crnc: props.filters.crnc || '',
     ccedula: props.filters.ccedula || '',
-    tipo_cliente: props.filters.tipo_cliente || '',
     estatus: props.filters.estatus || '',
     sucursal: props.filters.sucursal || '',
     es_prospecto: props.filters.es_prospecto || '',
@@ -87,13 +86,12 @@ const limpiarFiltros = () => {
     form.cnomcliente = '';
     form.crnc = '';
     form.ccedula = '';
-    form.tipo_cliente = '';
     form.estatus = '';
     form.sucursal = '';
     form.es_prospecto = '';
     form.page = 1;
     form.page_size = 10;
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.personales.index'), {
         preserveState: false,
         preserveScroll: false,
     });
@@ -110,7 +108,7 @@ const cambiarPagina = (page) => {
 const cambiarPageSize = (newSize) => {
     form.page_size = newSize;
     form.page = 1; // Resetear a la primera página
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.personales.index'), {
         preserveState: true,
         preserveScroll: true,
     });
@@ -414,11 +412,11 @@ const getNombreCompleto = (cliente) => {
 </script>
 
 <template>
-    <Head title="Clientes" />
+    <Head title="Clientes Personales" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-secondary leading-tight">Gestión de Clientes</h2>
+            <h2 class="font-semibold text-xl text-secondary leading-tight">Clientes Personales</h2>
         </template>
 
         <div class="py-12">
@@ -479,20 +477,6 @@ const getNombreCompleto = (cliente) => {
                                     v-model="form.ccedula"
                                     placeholder="Buscar por cédula..."
                                 />
-                            </div>
-
-                            <!-- Tipo Cliente -->
-                            <div>
-                                <InputLabel for="tipo_cliente" value="Tipo Cliente" />
-                                <select
-                                    id="tipo_cliente"
-                                    v-model="form.tipo_cliente"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                >
-                                    <option v-for="option in tipoClienteOptions" :key="option.value" :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </select>
                             </div>
 
                             <!-- Estatus -->

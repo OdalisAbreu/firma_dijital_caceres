@@ -76,10 +76,8 @@ class DashboardController extends Controller
             if (!$kyc->tracking_code) {
                 continue;
             }
-
             // Consultar el estatus del KYC
             $result = $this->kycService->consultarEstatus($kyc->tracking_code);
-Log::info('result: ' . json_encode($result));
             if ($result['success'] && isset($result['data'])) {
                 $apiResponse = $result['data'];
 
@@ -112,7 +110,6 @@ Log::info('result: ' . json_encode($result));
                 // Si status_firmante02 = RECEIVED, entonces status_firmante01 = RESPONSED
                 // Si kyc_status = RESPONSED, entonces status_firmante01 = RESPONSED
                 // En caso contrario, tomar el valor del API
-                Log::info('statusFirmante02FromApi: ' . $statusFirmante02FromApi);
                 if ($statusFirmante02FromApi === 'RECEIVED') {
                     $kyc->status_firmante01 = 'RESPONSED';
                 } 
