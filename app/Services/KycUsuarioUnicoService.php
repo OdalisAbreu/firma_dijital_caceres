@@ -104,7 +104,7 @@ class KycUsuarioUnicoService
      */
     protected function construirPayload(array $data): array
     {
-        $tipo_formulario = $data['tipodepersona'] == 'fisica' ? 'formulario_conocimiento_persona_fisica' : 'formulario_conocimiento_persona_juridica';
+        $tipo_formulario = $data['tipodepersona'] == 'fisica' ? 'formulario_conocimiento_persona_fisica_copy' : 'formulario_conocimiento_persona_juridica';
         // Valores por defecto
         $title = $data['title'] ?? 'Formulario KYC';
         $description = $data['description'] ?? 'Documento para firma electrónica';
@@ -155,7 +155,7 @@ class KycUsuarioUnicoService
                     'policies' => [
                         [
                             'evidences' => [
-                                [
+                              /*  [
                                     'type' => 'GENERIC',
                                     'enabled' => true,
                                     'visible' => true,
@@ -183,9 +183,27 @@ class KycUsuarioUnicoService
                                             'page' => 1,
                                             'rectangle' => [
                                                 'x' => 120,
-                                                'y' => 90,
+                                                'y' => 60,
                                                 'width' => 100,
                                                 'height' => 60,
+                                            ],
+                                        ],
+                                    ],
+                                ],*/
+                                [
+                                    'type' => 'SIGNATURE',
+                                    'enabled' => true,
+                                    'visible' => true,
+                                    'helpText' => 'Firma Cliente',
+                                    'recipientKey' => 'firmante01',
+                                    'positions' => [
+                                        [
+                                            'page' => 1,
+                                            'rectangle' => [
+                                                'x' => 100,
+                                                'y' => 52,
+                                                'width' => 150,
+                                                'height' => 80,
                                             ],
                                         ],
                                     ],
@@ -194,14 +212,32 @@ class KycUsuarioUnicoService
                                     'type' => 'SIGNATURE',
                                     'enabled' => true,
                                     'visible' => true,
-                                    'helpText' => 'Firma Interna Calidad',
+                                    'helpText' => 'Firma colaborador',
                                     'recipientKey' => 'firmante02',
                                     'positions' => [
                                         [
                                             'page' => 1,
                                             'rectangle' => [
-                                                'x' => 380,
-                                                'y' => 90,
+                                                'x' => 360,
+                                                'y' => 52,
+                                                'width' => 150,
+                                                'height' => 80,
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'type' => 'IMAGE',
+                                    'enabled' => true,
+                                    'visible' => true,
+                                    'helpText' => 'Sello de la empresa',
+                                    'recipientKey' => 'firmante02',
+                                    'positions' => [
+                                        [
+                                            'page' => 1,
+                                            'rectangle' => [
+                                                'x' => 290,
+                                                'y' => 20,
                                                 'width' => 150,
                                                 'height' => 80,
                                             ],
