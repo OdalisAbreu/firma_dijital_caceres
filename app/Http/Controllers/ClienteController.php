@@ -101,6 +101,7 @@ class ClienteController extends Controller
             'title' => 'Formulario KYC - ' . $validated['name_client'] . ' ' . $validated['lastname_client'],
             'description' => 'Documento para firma electrónica',
             'tipodepersona' => $validated['tipo_persona'],
+            'idioma' => $request->idioma,
             'name_client' => $validated['name_client'],
             'lastname_client' => $validated['lastname_client'],
             'email_client' => $validated['email_client'],

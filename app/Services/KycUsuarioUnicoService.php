@@ -104,7 +104,14 @@ class KycUsuarioUnicoService
      */
     protected function construirPayload(array $data): array
     {
-        $tipo_formulario = $data['tipodepersona'] == 'fisica' ? 'formulario_conocimiento_persona_fisica_copy' : 'formulario_conocimiento_persona_juridica';
+        $idioma = strtolower((string) ($data['idioma'] ?? 'es'));
+        if ($idioma !== 'en') {
+            $idioma = 'es';
+        }
+
+        $tipo_formulario = $data['tipodepersona'] == 'fisica'
+            ? ($idioma === 'en' ? 'formulario_conocimiento_persona_fisica_ing' : 'formulario_conocimiento_persona_fisica_esp')
+            : ($idioma === 'en' ? 'formulario_conocimiento_persona_juridica_ing' : 'formulario_conocimiento_persona_juridica_esp');
         // Valores por defecto
         $title = $data['title'] ?? 'Formulario KYC';
         $description = $data['description'] ?? 'Documento para firma electrónica';
@@ -119,6 +126,12 @@ class KycUsuarioUnicoService
         $name = $data['name'] ?? $nameClient;
         $lastname = $data['lastname'] ?? '';
         $codeEmployee = $data['code_employee'] ?? '';
+        $requestMailSubject = $idioma === 'en'
+            ? 'Information update document - Caceres & Asociados'
+            : 'Documento para Actualización de Información - Cáceres & Asociados';
+        $requestMailBody = $idioma === 'en'
+            ? "<p>Dear {$name}, receive a warm greeting from <b>Cáceres & Asociados</b>.</p> <p>To continue your process in a timely manner, please carefully review the attached document and complete it with your electronic signature through this secure channel.</p> <p>We appreciate your trust in us.</p>"
+            : "<p>Estimado {$name}, reciba un cordial saludo de parte de <b>Cáceres & Asociados</b>.</p> <p>Con el objetivo de dar continuidad a su trámite de manera oportuna, le agradecemos revisar detenidamente el documento adjunto y completar con su firma electrónica a través de este medio seguro.</p> <p>Agradecemos la confianza depositada en nosotros.</p>";
 
         return [
             'groupCode' => 'caceresyasociados',
@@ -139,9 +152,9 @@ class KycUsuarioUnicoService
                 ],
             ],
             'customization' => [
-                'requestMailSubject' => 'Documento listo para firmar',
-                'requestMailBody' => "Hola {$name},\n\nPor favor revisa y firma el documento adjunto.\n\nSaludos.",
-                'requestSmsBody' => 'Tienes un documento pendiente de firma. Por favor revisa tu correo.',
+                'requestMailSubject' => $requestMailSubject,
+                'requestMailBody' => $requestMailBody,
+             //   'requestSmsBody' => 'Tienes un documento pendiente de firma. Por favor revisa tu correo.  ',
             ],
             'messages' => [
                 [
@@ -226,7 +239,7 @@ class KycUsuarioUnicoService
                                         ],
                                     ],
                                 ],
-                                [
+                             /*   [
                                     'type' => 'IMAGE',
                                     'enabled' => true,
                                     'visible' => true,
@@ -243,7 +256,7 @@ class KycUsuarioUnicoService
                                             ],
                                         ],
                                     ],
-                                ],
+                                ],*/
                             ],
                             'signatures' => [
                                 [

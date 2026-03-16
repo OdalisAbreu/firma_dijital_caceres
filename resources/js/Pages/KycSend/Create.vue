@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 // Funciones para conversión de fechas
 const convertToDateInput = (dateString) => {
@@ -80,6 +80,7 @@ const form = useForm({
     title: '',
     description: '',
     tipo_persona: '',
+    idioma: 'es',
     name_client: '',
     lastname_client: '',
     email_client: '',
@@ -121,6 +122,16 @@ const form = useForm({
     solicituddeseguro: '',
     fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
 });
+
+const idiomaOpen = ref(false);
+const idiomaOptions = [
+    { value: 'es', label: 'Español', flag: '/flags/do.png' },
+    { value: 'en', label: 'English', flag: '/flags/us.png' },
+];
+const selectIdioma = (value) => {
+    form.idioma = value;
+    idiomaOpen.value = false;
+};
 
 const tipoIdentificacionOptions = [
     { value: '', label: 'Seleccione...' },
@@ -221,6 +232,41 @@ const submit = () => {
 
                             <!-- Campos en grid de 3 columnas -->
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                <!-- Idioma -->
+                                <div class="relative">
+                                    <InputLabel for="idioma" value="Idioma" />
+                                    <button
+                                        id="idioma"
+                                        type="button"
+                                        @click="idiomaOpen = !idiomaOpen"
+                                        class="mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm px-3 py-2 text-left focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                    >
+                                        <span class="flex items-center gap-2">
+                                            <img
+                                                :src="idiomaOptions.find((o) => o.value === form.idioma)?.flag"
+                                                :alt="form.idioma"
+                                                class="w-5 h-3 rounded-sm"
+                                            />
+                                            <span>{{ idiomaOptions.find((o) => o.value === form.idioma)?.label }}</span>
+                                        </span>
+                                    </button>
+                                    <div
+                                        v-if="idiomaOpen"
+                                        class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg"
+                                    >
+                                        <button
+                                            v-for="option in idiomaOptions"
+                                            :key="option.value"
+                                            type="button"
+                                            @click="selectIdioma(option.value)"
+                                            class="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                        >
+                                            <img :src="option.flag" :alt="option.value" class="w-5 h-3 rounded-sm" />
+                                            <span>{{ option.label }}</span>
+                                        </button>
+                                    </div>
+                                    <InputError class="mt-2" :message="form.errors.idioma" />
+                                </div>
 
                                 <!-- Dropdown de Tipo de Persona -->
                                 <div>

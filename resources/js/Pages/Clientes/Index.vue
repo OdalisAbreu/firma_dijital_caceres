@@ -118,8 +118,18 @@ const cambiarPageSize = (newSize) => {
 
 const showModal = ref(false);
 const selectedCliente = ref(null);
+const idiomaOpen = ref(false);
+const idiomaOptions = [
+    { value: 'es', label: 'Español', flag: '/flags/do.png' },
+    { value: 'en', label: 'English', flag: '/flags/us.png' },
+];
+const selectIdioma = (value) => {
+    kycForm.idioma = value;
+    idiomaOpen.value = false;
+};
 const kycForm = useForm({
     tipo_persona: '',
+    idioma: 'es',
     name_client: '',
     lastname_client: '',
     email_client: '',
@@ -764,6 +774,42 @@ const getNombreCompleto = (cliente) => {
 
                                 <!-- Campos Obligatorios -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Idioma -->
+                                    <div class="relative">
+                                        <InputLabel for="idioma" value="Idioma" />
+                                        <button
+                                            id="idioma"
+                                            type="button"
+                                            @click="idiomaOpen = !idiomaOpen"
+                                            class="mt-1 w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 text-left focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                        >
+                                            <span class="flex items-center gap-2">
+                                                <img
+                                                    :src="idiomaOptions.find((o) => o.value === kycForm.idioma)?.flag"
+                                                    :alt="kycForm.idioma"
+                                                    class="w-5 h-3 rounded-sm"
+                                                />
+                                                <span>{{ idiomaOptions.find((o) => o.value === kycForm.idioma)?.label }}</span>
+                                            </span>
+                                        </button>
+                                        <div
+                                            v-if="idiomaOpen"
+                                            class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg"
+                                        >
+                                            <button
+                                                v-for="option in idiomaOptions"
+                                                :key="option.value"
+                                                type="button"
+                                                @click="selectIdioma(option.value)"
+                                                class="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                                            >
+                                                <img :src="option.flag" :alt="option.value" class="w-5 h-3 rounded-sm" />
+                                                <span>{{ option.label }}</span>
+                                            </button>
+                                        </div>
+                                        <span v-if="kycForm.errors.idioma" class="text-red-600 text-sm">{{ kycForm.errors.idioma }}</span>
+                                    </div>
+
                                     <!-- Tipo de Persona * -->
                                     <div>
                                         <InputLabel for="tipo_persona" value="Tipo de Persona *" />
