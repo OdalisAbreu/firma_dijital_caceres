@@ -103,15 +103,15 @@ onMounted(() => {
                                             <DropdownLink :href="route('clientes.personales.index')" :active="route().current('clientes.personales.*')">
                                                 Clientes Personales
                                             </DropdownLink>
-                                            <DropdownLink :href="route('clientes.corporativos.index')" :active="route().current('clientes.corporativos.*')">
+                                            <!-- <DropdownLink :href="route('clientes.corporativos.index')" :active="route().current('clientes.corporativos.*')">
                                                 Clientes Corporativos
-                                            </DropdownLink>
+                                            </DropdownLink> -->
                                             <DropdownLink :href="route('clientes.personales.kyc-vencidos')" :active="route().current('clientes.personales.kyc-vencidos')">
                                                 KYC Vencidos Personales
                                             </DropdownLink>
-                                            <DropdownLink :href="route('clientes.corporativos.kyc-vencidos')" :active="route().current('clientes.corporativos.kyc-vencidos')">
+                                            <!-- <DropdownLink :href="route('clientes.corporativos.kyc-vencidos')" :active="route().current('clientes.corporativos.kyc-vencidos')">
                                                 KYC Vencidos Corporativos
-                                            </DropdownLink>
+                                            </DropdownLink> -->
                                         </template>
                                     </Dropdown>
                                 </div>
@@ -331,12 +331,12 @@ onMounted(() => {
                                 <ResponsiveNavLink :href="route('clientes.personales.kyc-vencidos')" :active="route().current('clientes.personales.kyc-vencidos')">
                                     KYC Vencidos Personales
                                 </ResponsiveNavLink>
-                                <ResponsiveNavLink :href="route('clientes.corporativos.index')" :active="route().current('clientes.corporativos.*')">
+                                <!-- <ResponsiveNavLink :href="route('clientes.corporativos.index')" :active="route().current('clientes.corporativos.*')">
                                     Clientes Corporativos
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('clientes.corporativos.kyc-vencidos')" :active="route().current('clientes.corporativos.kyc-vencidos')">
                                     KYC Vencidos Corporativos
-                                </ResponsiveNavLink>
+                                </ResponsiveNavLink> -->
                                 <ResponsiveNavLink :href="route('kyc-send.create')" :active="route().current('kyc-send.*')">
                                     Nuevo Cliente
                                 </ResponsiveNavLink>
