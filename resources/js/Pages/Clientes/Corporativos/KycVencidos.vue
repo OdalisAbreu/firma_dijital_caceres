@@ -422,11 +422,11 @@ const submitKyc = () => {
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
-                            <div>
+                            <!-- <div>
                                 <h3 class="text-lg font-semibold text-secondary dark:text-white">Total de Clientes Corporativos con KYC Vencidos</h3>
                                 <p class="text-3xl font-bold text-primary mt-2">{{ total.toLocaleString() }}</p>
-                            </div>
-                            <div v-if="totalesPorEstado && Object.keys(totalesPorEstado).length > 0" class="text-right">
+                            </div> -->
+                            <!-- <div v-if="totalesPorEstado && Object.keys(totalesPorEstado).length > 0" class="text-right">
                                 <h4 class="text-sm font-semibold text-secondary dark:text-white mb-2">Totales por Estado:</h4>
                                 <div class="space-y-1 text-sm">
                                     <div v-if="totalesPorEstado.vigente !== undefined">
@@ -445,7 +445,7 @@ const submitKyc = () => {
                                         <span class="text-gray-600 dark:text-gray-400">Sin Clasificar:</span> {{ totalesPorEstado.sin_clasificar }}
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -473,7 +473,7 @@ const submitKyc = () => {
                             </div>
 
                             <!-- Estado Formulario -->
-                            <div>
+                            <!-- <div>
                                 <InputLabel for="estado_formulario" value="Estado del Formulario" />
                                 <select
                                     id="estado_formulario"
@@ -484,7 +484,7 @@ const submitKyc = () => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="mt-4 flex gap-2">
