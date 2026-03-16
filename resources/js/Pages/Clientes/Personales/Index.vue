@@ -97,21 +97,39 @@ const limpiarFiltros = () => {
     });
 };
 
+const buildPaginationQuery = () => {
+    const query = {
+        page: form.page,
+        page_size: form.page_size,
+    };
+
+    if (form.cnomcliente) query.cnomcliente = form.cnomcliente;
+    if (form.crnc) query.crnc = form.crnc;
+    if (form.ccedula) query.ccedula = form.ccedula;
+    if (form.estatus) query.estatus = form.estatus;
+    if (form.sucursal) query.sucursal = form.sucursal;
+    if (form.es_prospecto) query.es_prospecto = form.es_prospecto;
+
+    return query;
+};
+
 const cambiarPagina = (page) => {
     form.page = page;
-    form.get(route('clientes.index'), {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(
+        route('clientes.personales.index'),
+        buildPaginationQuery(),
+        { preserveState: true, preserveScroll: true }
+    );
 };
 
 const cambiarPageSize = (newSize) => {
     form.page_size = newSize;
     form.page = 1; // Resetear a la primera página
-    form.get(route('clientes.personales.index'), {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(
+        route('clientes.personales.index'),
+        buildPaginationQuery(),
+        { preserveState: true, preserveScroll: true }
+    );
 };
 
 const showModal = ref(false);
@@ -504,7 +522,7 @@ const getNombreCompleto = (cliente) => {
                             </div> -->
 
                             <!-- Sucursal -->
-                            <!-- <div>
+                            <div>
                                 <InputLabel for="sucursal" value="Sucursal" />
                                 <select
                                     id="sucursal"
@@ -515,7 +533,7 @@ const getNombreCompleto = (cliente) => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                            </div> -->
+                            </div>
 
                             <!-- Tipo -->
                             <div>

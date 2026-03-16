@@ -520,7 +520,7 @@ const getNombreCompleto = (cliente) => {
                             </div> -->
 
                             <!-- Sucursal -->
-                           <!-- <div>
+                           <div>
                                  <InputLabel for="sucursal" value="Sucursal" />
                                 <select
                                     id="sucursal"
@@ -531,7 +531,7 @@ const getNombreCompleto = (cliente) => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                            </div> -->
+                            </div>
 
                             <!-- Tipo -->
                             <div>
