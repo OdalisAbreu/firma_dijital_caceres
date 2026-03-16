@@ -434,7 +434,7 @@ const getNombreCompleto = (cliente) => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Resumen -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <!-- <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
@@ -443,7 +443,7 @@ const getNombreCompleto = (cliente) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Filtros -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
@@ -492,7 +492,7 @@ const getNombreCompleto = (cliente) => {
                             </div>
 
                             <!-- Tipo Cliente -->
-                            <div>
+                            <!-- <div>
                                 <InputLabel for="tipo_cliente" value="Tipo Cliente" />
                                 <select
                                     id="tipo_cliente"
@@ -503,10 +503,10 @@ const getNombreCompleto = (cliente) => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                            </div>
+                            </div> -->
 
                             <!-- Estatus -->
-                            <div>
+                            <!-- <div>
                                 <InputLabel for="estatus" value="Estatus" />
                                 <select
                                     id="estatus"
@@ -517,11 +517,11 @@ const getNombreCompleto = (cliente) => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                            </div>
+                            </div> -->
 
                             <!-- Sucursal -->
-                            <div>
-                                <InputLabel for="sucursal" value="Sucursal" />
+                           <!-- <div>
+                                 <InputLabel for="sucursal" value="Sucursal" />
                                 <select
                                     id="sucursal"
                                     v-model="form.sucursal"
@@ -531,7 +531,7 @@ const getNombreCompleto = (cliente) => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                            </div>
+                            </div> -->
 
                             <!-- Tipo -->
                             <div>
