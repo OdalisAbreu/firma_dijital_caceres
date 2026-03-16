@@ -29,6 +29,9 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::post('/dashboard/actualizar-estados', [App\Http\Controllers\DashboardController::class, 'actualizarEstados'])->middleware(['auth', 'verified'])->name('dashboard.actualizar-estados');
+Route::delete('/dashboard/kyc/{kycSend}', [App\Http\Controllers\DashboardController::class, 'destroy'])
+    ->middleware(['auth', 'verified', 'admin'])
+    ->name('dashboard.kyc.destroy');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

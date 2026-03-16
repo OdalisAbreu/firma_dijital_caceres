@@ -130,4 +130,16 @@ class DashboardController extends Controller
 
         return redirect()->route('dashboard')->with('success', "Se actualizaron {$actualizados} registros KYC. Errores: {$errores}");
     }
+
+    /**
+     * Elimina un registro KYC (solo administradores)
+     */
+    public function destroy(KycSend $kycSend)
+    {
+        abort_unless(auth()->user()?->role === 'administrador', 403);
+
+        $kycSend->delete();
+
+        return redirect()->route('dashboard')->with('success', 'Registro KYC eliminado correctamente.');
+    }
 }

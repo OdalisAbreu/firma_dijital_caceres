@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
@@ -71,7 +71,10 @@ const getStatusLabel = (status) => {
     return status || 'Desconocido';
 };
 
+const page = usePage();
+const isAdmin = computed(() => page.props.auth?.user?.role === 'administrador');
 const form = useForm({});
+const deleteForm = useForm({});
 
 const actualizarEstados = () => {
     if (confirm('¿Estás seguro de que deseas actualizar los estados de los KYC pendientes?')) {
@@ -80,6 +83,15 @@ const actualizarEstados = () => {
             onSuccess: () => {
                 // El mensaje de éxito se mostrará automáticamente desde el flash
             },
+        });
+    }
+};
+
+const eliminarRegistro = (kycId) => {
+    if (!isAdmin.value) return;
+    if (confirm('¿Estás seguro de que deseas eliminar este registro KYC?')) {
+        deleteForm.delete(route('dashboard.kyc.destroy', kycId), {
+            preserveScroll: true,
         });
     }
 };
@@ -222,6 +234,12 @@ const actualizarEstados = () => {
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Fecha de Envío
                                         </th>
+                                        <th
+                                            v-if="isAdmin"
+                                            class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                                        >
+                                            Acción
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -261,6 +279,16 @@ const actualizarEstados = () => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
                                             {{ formatDate(kyc.created_at) }}
+                                        </td>
+                                        <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <button
+                                                type="button"
+                                                @click="eliminarRegistro(kyc.id)"
+                                                :disabled="deleteForm.processing"
+                                                class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
