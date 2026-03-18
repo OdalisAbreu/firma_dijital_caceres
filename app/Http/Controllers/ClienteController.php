@@ -24,10 +24,14 @@ class ClienteController extends Controller
      */
     public function index(Request $request)
     {
+        $kycSends = KycSend::select('client_code', 'email', 'created_at', 'user_id')
+            ->with('user:id,name')
+            ->get();
         // Preparar filtros desde la request
         $filters = [
             'page' => $request->get('page', 1),
             'page_size' => $request->get('page_size', 10),
+            'estado_formulario' => 'VENCIDO',
         ];
 
         // Agregar filtros opcionales solo si están presentes
@@ -56,6 +60,7 @@ class ClienteController extends Controller
                 'total' => 0,
                 'error' => $result['error'] ?? 'Error al obtener los clientes',
                 'filters' => $request->only($optionalFilters),
+                'kycSends' => $kycSends,
             ]);
         }
 
@@ -74,6 +79,7 @@ class ClienteController extends Controller
             'clientes' => $clientes,
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
+            'kycSends' => $kycSends,
         ]);
     }
 
@@ -182,6 +188,9 @@ class ClienteController extends Controller
      */
     public function personales(Request $request)
     {
+        $kycSends = KycSend::select('client_code', 'email', 'created_at', 'user_id')
+            ->with('user:id,name')
+            ->get();
         // Preparar filtros desde la request
         $filters = [
             'page' => $request->get('page', 1),
@@ -212,6 +221,7 @@ class ClienteController extends Controller
                 'total' => 0,
                 'error' => $result['error'] ?? 'Error al obtener los clientes personales',
                 'filters' => $request->only($optionalFilters),
+                'kycSends' => $kycSends,
             ]);
         }
 
@@ -229,6 +239,7 @@ class ClienteController extends Controller
             'clientes' => $clientes,
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
+            'kycSends' => $kycSends,
         ]);
     }
 
@@ -292,6 +303,9 @@ class ClienteController extends Controller
      */
     public function personalesKycVencidos(Request $request)
     {
+        $kycSends = KycSend::select('client_code', 'email', 'created_at', 'user_id')
+            ->with('user:id,name')
+            ->get();
         // Preparar filtros desde la request
         $filters = [
             'page' => $request->get('page', 1),
@@ -301,7 +315,7 @@ class ClienteController extends Controller
         // Agregar filtros opcionales solo si están presentes
         $optionalFilters = [
             'cnomcliente',
-            'estado_formulario',
+            'sucursal',
         ];
 
         foreach ($optionalFilters as $filter) {
@@ -320,6 +334,7 @@ class ClienteController extends Controller
                 'error' => $result['error'] ?? 'Error al obtener los clientes personales con KYC vencidos',
                 'filters' => $request->only($optionalFilters),
                 'totalesPorEstado' => [],
+                'kycSends' => $kycSends,
             ]);
         }
 
@@ -338,6 +353,7 @@ class ClienteController extends Controller
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
             'totalesPorEstado' => $data['totales_por_estado'] ?? [],
+            'kycSends' => $kycSends,
         ]);
     }
 
@@ -400,6 +416,9 @@ class ClienteController extends Controller
      */
     public function kycVencidos(Request $request)
     {
+        $kycSends = KycSend::select('client_code', 'email', 'created_at', 'user_id')
+            ->with('user:id,name')
+            ->get();
         // Preparar filtros desde la request
         $filters = [
             'page' => $request->get('page', 1),
@@ -429,6 +448,7 @@ class ClienteController extends Controller
                 'error' => $result['error'] ?? 'Error al obtener los clientes con KYC vencidos',
                 'filters' => $request->only($optionalFilters),
                 'totalesPorEstado' => [],
+                'kycSends' => $kycSends,
             ]);
         }
 
@@ -448,6 +468,7 @@ class ClienteController extends Controller
             'total' => $data['total'] ?? 0,
             'filters' => $request->only($optionalFilters),
             'totalesPorEstado' => $data['totales_por_estado'] ?? [],
+            'kycSends' => $kycSends,
         ]);
     }
 }

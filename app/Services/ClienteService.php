@@ -163,6 +163,7 @@ class ClienteService
             $optionalFilters = [
                 'cnomcliente',
                 'estado_formulario',
+                'sucursal',
             ];
 
             foreach ($optionalFilters as $filter) {
@@ -325,6 +326,7 @@ class ClienteService
             $optionalFilters = [
                 'cnomcliente',
                 'estado_formulario',
+                'sucursal',
             ];
 
             foreach ($optionalFilters as $filter) {

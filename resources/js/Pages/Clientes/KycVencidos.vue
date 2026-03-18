@@ -28,6 +28,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    kycSends: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const form = useForm({
@@ -113,6 +117,44 @@ const formatDate = (dateString) => {
     }
 };
 
+const kycSendsByClient = computed(() => {
+    const map = new Map();
+    (props.kycSends || []).forEach((item) => {
+        if (item?.client_code) {
+            map.set(String(item.client_code), item);
+        }
+    });
+    return map;
+});
+
+const kycSendsByEmail = computed(() => {
+    const map = new Map();
+    (props.kycSends || []).forEach((item) => {
+        if (item?.email) {
+            map.set(String(item.email).toLowerCase(), item);
+        }
+    });
+    return map;
+});
+
+const getKycSendEntry = (cliente) => {
+    const doc = getCedulaRncPasaporte(cliente);
+    if (doc && kycSendsByClient.value.has(String(doc))) {
+        return kycSendsByClient.value.get(String(doc));
+    }
+    const email = (cliente?.correo_electronico || '').toLowerCase();
+    return email && kycSendsByEmail.value.has(email) ? kycSendsByEmail.value.get(email) : null;
+};
+
+const getKycSendDate = (cliente) => getKycSendEntry(cliente)?.created_at || null;
+
+const buildKycExistsMessage = (cliente, entry) => {
+    const nombreCliente = getNombreCompleto(cliente) || 'N/A';
+    const nombreUsuario = entry?.user?.name || 'N/A';
+    const fecha = formatDate(entry?.created_at);
+    return `Al cliente ${nombreCliente} el usuario ${nombreUsuario} le envió el formulario de debida diligencia en fecha ${fecha}.`;
+};
+
 const getEstadoBadgeClass = (estado) => {
     const estadoLower = estado?.toLowerCase() || '';
     if (estadoLower.includes('vencido')) {
@@ -137,6 +179,9 @@ const userDisplay = computed(() => {
 
 const showModal = ref(false);
 const selectedCliente = ref(null);
+const showKycExistsModal = ref(false);
+const kycExistsMessage = ref('');
+const kycExistsCliente = ref(null);
 const kycForm = useForm({
     tipo_persona: '',
     name_client: '',
@@ -282,7 +327,7 @@ const getTipoTercero = (cliente) => {
     return '';
 };
 
-const enviarKYC = (cliente) => {
+const openKycModal = (cliente) => {
     selectedCliente.value = cliente;
     
     // Determinar tipo de persona basado en tipo_cliente
@@ -375,6 +420,17 @@ const enviarKYC = (cliente) => {
     kycForm.fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     
     showModal.value = true;
+};
+
+const enviarKYC = (cliente) => {
+    const entry = getKycSendEntry(cliente);
+    if (entry) {
+        kycExistsMessage.value = buildKycExistsMessage(cliente, entry);
+        kycExistsCliente.value = cliente;
+        showKycExistsModal.value = true;
+        return;
+    }
+    openKycModal(cliente);
 };
 
 const cerrarModal = () => {
@@ -538,6 +594,9 @@ const submitKyc = () => {
                                             Días hasta Vencimiento
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                            Enviando en
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Acciones
                                         </th>
                                       <!--  <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
@@ -549,7 +608,12 @@ const submitKyc = () => {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="cliente in clientes.data" :key="cliente.id_client" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <tr
+                                        v-for="cliente in clientes.data"
+                                        :key="cliente.id_client"
+                                        class="hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        :class="getKycSendDate(cliente) ? 'bg-amber-50 dark:bg-amber-900/20' : ''"
+                                    >
                                         <td class="px-6 py-4 text-sm text-secondary dark:text-gray-300" style="max-width: 200px; width: 200px;">
                                             <div 
                                                 class="truncate" 
@@ -587,6 +651,9 @@ const submitKyc = () => {
                                             >
                                                 {{ cliente.dias_hasta_vencimiento !== undefined ? cliente.dias_hasta_vencimiento : 'N/A' }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
+                                            {{ formatDate(getKycSendDate(cliente)) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button
@@ -667,6 +734,61 @@ const submitKyc = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Modal KYC ya enviado -->
+        <Transition
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="showKycExistsModal"
+                class="fixed inset-0 z-50 overflow-y-auto"
+                @click.self="showKycExistsModal = false"
+            >
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="showKycExistsModal = false"></div>
+
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-secondary">KYC ya enviado</h3>
+                                <button
+                                    @click="showKycExistsModal = false"
+                                    class="text-gray-400 hover:text-gray-500"
+                                >
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm text-secondary">
+                                {{ kycExistsMessage }}
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                            <button
+                                type="button"
+                                @click="() => { showKycExistsModal = false; openKycModal(kycExistsCliente); }"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-dark sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Continuar y enviar
+                            </button>
+                            <button
+                                type="button"
+                                @click="showKycExistsModal = false"
+                                class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-secondary hover:bg-gray-50 sm:w-auto sm:text-sm"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
 
         <!-- Modal Enviar KYC -->
         <Transition
