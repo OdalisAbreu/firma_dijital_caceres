@@ -125,6 +125,7 @@ const selectedCliente = ref(null);
 const showKycExistsModal = ref(false);
 const kycExistsMessage = ref('');
 const kycExistsCliente = ref(null);
+const showKycSuccessModal = ref(false);
 const idiomaOpen = ref(false);
 const idiomaOptions = [
     { value: 'es', label: 'Español', flag: '/flags/do.png' },
@@ -410,6 +411,7 @@ const submitKyc = () => {
         preserveScroll: true,
         onSuccess: () => {
             cerrarModal();
+            showKycSuccessModal.value = true;
         },
     });
 };
@@ -845,6 +847,54 @@ const buildKycExistsMessage = (cliente, entry) => {
                                 class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-secondary hover:bg-gray-50 sm:w-auto sm:text-sm"
                             >
                                 Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- Modal Envío Exitoso -->
+        <Transition
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="showKycSuccessModal"
+                class="fixed inset-0 z-50 overflow-y-auto"
+                @click.self="showKycSuccessModal = false"
+            >
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="showKycSuccessModal = false"></div>
+
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-secondary">Envío exitoso</h3>
+                                <button
+                                    @click="showKycSuccessModal = false"
+                                    class="text-gray-400 hover:text-gray-500"
+                                >
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm text-secondary">
+                                El envío del formulario KYC se realizó de manera correcta.
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button
+                                type="button"
+                                @click="showKycSuccessModal = false"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-dark sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Entendido
                             </button>
                         </div>
                     </div>

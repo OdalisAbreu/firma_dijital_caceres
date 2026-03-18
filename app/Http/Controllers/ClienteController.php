@@ -95,6 +95,7 @@ class ClienteController extends Controller
             'sucursal' => 'required|in:Principal,Romana,Punta Cana',
             'tipodeidentificacion' => 'required|string|max:255',
             'numero_identificacion' => 'required|string|max:255',
+            'redirect_to' => 'nullable|string',
         ]);
 
         // Integrar el servicio de kyc usuario unico
@@ -174,7 +175,18 @@ class ClienteController extends Controller
                 'client_code' => $validated['numero_identificacion'] ?? null,
             ]);
 
-            return redirect()->route('clientes.index')->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
+            $allowedRedirects = [
+                route('clientes.index'),
+                route('clientes.personales.index'),
+                route('clientes.corporativos.index'),
+                route('clientes.kyc-vencidos'),
+                route('clientes.personales.kyc-vencidos'),
+                route('clientes.corporativos.kyc-vencidos'),
+            ];
+            $redirectTo = $request->input('redirect_to');
+            $redirectTo = in_array($redirectTo, $allowedRedirects, true) ? $redirectTo : route('clientes.index');
+
+            return redirect($redirectTo)->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
         }
 
         Log::error('Error al enviar el formulario KYC: ' . ($response['error'] ?? 'Error desconocido'));
