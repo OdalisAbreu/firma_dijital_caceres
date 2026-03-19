@@ -35,6 +35,8 @@ class KycSendController extends Controller
             'description' => 'nullable|string|max:500',
             'tipo_persona' => 'required|in:fisica,juridica',
             'idioma' => 'nullable|in:es,en',
+            'redirect_to' => 'nullable|string',
+            'redirect_query' => 'nullable|array',
             'name_client' => 'required|string|max:255',
             'lastname_client' => 'required|string|max:255',
             'email_client' => 'required|email|max:255',
@@ -134,7 +136,14 @@ class KycSendController extends Controller
         ];
 
         // Enviar el formulario KYC
-        $result = $this->kycService->enviarFormularioKyc($kycData);
+         $result = $this->kycService->enviarFormularioKyc($kycData);
+        /*$result = [
+            'success' => true,
+            'data' => [
+                'status' => 'RECEIVED',
+                'code' => 'DUMMY-' . now()->format('YmdHis'),
+            ],
+        ];*/
 
         if ($result['success'] && isset($result['data'])) {
             $apiResponse = $result['data'];
@@ -153,7 +162,36 @@ class KycSendController extends Controller
                 'client_code' => $validated['numero_identificacion'] ?? null,
             ]);
 
-            return redirect()->route('dashboard')->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
+            $defaultRedirect = route('dashboard');
+            $redirectTo = $request->input('redirect_to', $defaultRedirect);
+            $allowedRedirects = [
+                $defaultRedirect,
+                route('clientes.index'),
+                route('clientes.personales.index'),
+                route('clientes.corporativos.index'),
+                route('clientes.kyc-vencidos'),
+                route('clientes.personales.kyc-vencidos'),
+                route('clientes.corporativos.kyc-vencidos'),
+                route('kyc-send.create'),
+            ];
+            $redirectTo = in_array($redirectTo, $allowedRedirects, true) ? $redirectTo : $defaultRedirect;
+
+            $allowedQueryKeys = [
+                'cnomcliente',
+                'crnc',
+                'ccedula',
+                'estatus',
+                'sucursal',
+                'es_prospecto',
+                'estado_formulario',
+                'page',
+                'page_size',
+            ];
+            $query = $request->input('redirect_query', $request->only($allowedQueryKeys));
+            $query = array_intersect_key($query, array_flip($allowedQueryKeys));
+            $targetUrl = $redirectTo . (empty($query) ? '' : ('?' . http_build_query($query)));
+
+            return redirect()->to($targetUrl)->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
         }
 
         return back()->withErrors([

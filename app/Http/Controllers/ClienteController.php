@@ -96,6 +96,7 @@ class ClienteController extends Controller
             'tipodeidentificacion' => 'required|string|max:255',
             'numero_identificacion' => 'required|string|max:255',
             'redirect_to' => 'nullable|string',
+            'redirect_query' => 'nullable|array',
         ]);
 
         // Integrar el servicio de kyc usuario unico
@@ -156,7 +157,14 @@ class ClienteController extends Controller
             'fecha' => $request->fecha ?? now()->format('d/m/Y'),
         ];
 
-        $response = $kycUsuarioUnicoService->enviarFormularioKyc($data);
+         $response = $kycUsuarioUnicoService->enviarFormularioKyc($data);
+        /*$response = [
+            'success' => true,
+            'data' => [
+                'status' => 'RECEIVED',
+                'code' => 'DUMMY-' . now()->format('YmdHis'),
+            ],
+        ];*/
         
         if ($response['success'] && isset($response['data'])) {
             $apiResponse = $response['data'];
@@ -186,7 +194,24 @@ class ClienteController extends Controller
             $redirectTo = $request->input('redirect_to');
             $redirectTo = in_array($redirectTo, $allowedRedirects, true) ? $redirectTo : route('clientes.index');
 
-            return redirect($redirectTo)->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
+            $allowedQueryKeys = [
+                'cnomcliente',
+                'crnc',
+                'ccedula',
+                'estatus',
+                'sucursal',
+                'es_prospecto',
+                'estado_formulario',
+                'page',
+                'page_size',
+            ];
+            $query = $request->input('redirect_query', $request->only($allowedQueryKeys));
+            $query = array_intersect_key($query, array_flip($allowedQueryKeys));
+
+            $targetUrl = $redirectTo . (empty($query) ? '' : ('?' . http_build_query($query)));
+
+            return redirect()->to($targetUrl)
+                ->with('success', 'Formulario KYC enviado exitosamente. Código de seguimiento: ' . ($apiResponse['code'] ?? 'N/A'));
         }
 
         Log::error('Error al enviar el formulario KYC: ' . ($response['error'] ?? 'Error desconocido'));

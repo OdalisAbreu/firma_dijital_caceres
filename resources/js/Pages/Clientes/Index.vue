@@ -138,6 +138,12 @@ const selectIdioma = (value) => {
 const kycForm = useForm({
     tipo_persona: '',
     idioma: 'es',
+    redirect_to: route('clientes.index'),
+    redirect_query: {
+        ...(props.filters || {}),
+        page: form.page,
+        page_size: form.page_size,
+    },
     name_client: '',
     lastname_client: '',
     email_client: '',
@@ -406,6 +412,11 @@ const submitKyc = () => {
     if (kycForm.informacionactividadeconomica === 'Otro' && kycForm.otroactividadeconomica) {
         kycForm.informacionactividadeconomica = kycForm.otroactividadeconomica;
     }
+    kycForm.redirect_query = {
+        ...(props.filters || {}),
+        page: form.page,
+        page_size: form.page_size,
+    };
     
     kycForm.post(route('clientes.enviar-kyc'), {
         preserveScroll: true,
