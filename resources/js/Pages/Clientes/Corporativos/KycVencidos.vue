@@ -55,7 +55,7 @@ const aplicarFiltros = () => {
 
 const limpiarFiltros = () => {
     form.cnomcliente = '';
-    form.estado_formulario = 'VENCIDO (NO REMITIDO)';
+    form.estado_formulario = 'VENCIDO';
     form.page = 1;
     form.page_size = 10;
     form.get(route('clientes.corporativos.kyc-vencidos'), {
@@ -64,21 +64,33 @@ const limpiarFiltros = () => {
     });
 };
 
+const buildPaginationQuery = () => {
+    const query = {
+        page: form.page,
+        page_size: form.page_size,
+        estado_formulario: 'VENCIDO',
+    };
+    if (form.cnomcliente) query.cnomcliente = form.cnomcliente;
+    return query;
+};
+
 const cambiarPagina = (page) => {
     form.page = page;
-    form.get(route('clientes.corporativos.kyc-vencidos'), {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(
+        route('clientes.corporativos.kyc-vencidos'),
+        buildPaginationQuery(),
+        { preserveState: true, preserveScroll: true }
+    );
 };
 
 const cambiarPageSize = (newSize) => {
     form.page_size = newSize;
     form.page = 1; // Resetear a la primera página
-    form.get(route('clientes.corporativos.kyc-vencidos'), {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(
+        route('clientes.corporativos.kyc-vencidos'),
+        buildPaginationQuery(),
+        { preserveState: true, preserveScroll: true }
+    );
 };
 
 const getCedulaRncPasaporte = (cliente) => {
