@@ -1,14 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 
 const props = defineProps({
     kycSends: {
-        type: Array,
-        default: () => [],
+        type: Object,
+        default: () => ({ data: [], current_page: 1, last_page: 1 }),
     },
     totalCompletados: {
         type: Number,
@@ -26,7 +26,30 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
 });
+
+const pageSize = ref(props.filters?.page_size || 10);
+
+const cambiarPagina = (page) => {
+    router.get(
+        route('dashboard'),
+        { page, page_size: pageSize.value },
+        { preserveState: true, preserveScroll: true }
+    );
+};
+
+const cambiarPageSize = (newSize) => {
+    pageSize.value = newSize;
+    router.get(
+        route('dashboard'),
+        { page: 1, page_size: newSize },
+        { preserveState: true, preserveScroll: true }
+    );
+};
 
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -38,6 +61,15 @@ const formatDate = (dateString) => {
         hour: '2-digit',
         minute: '2-digit',
     });
+};
+
+const getNombreCompleto = (kyc) => {
+    return `${kyc.name_client || ''} ${kyc.lastname_client || ''}`.trim();
+};
+
+const truncarTexto = (text, max = 15) => {
+    if (!text) return '';
+    return text.length > max ? text.slice(0, max) + '...' : text;
 };
 
 const getStatusBadgeClass = (status) => {
@@ -205,7 +237,7 @@ const eliminarRegistro = (kycId) => {
                             {{ $page.props.flash.success }}
                         </div>
                         
-                        <div v-if="kycSends.length === 0" class="text-center py-8">
+                        <div v-if="!kycSends.data || kycSends.data.length === 0" class="text-center py-8">
                             <p class="text-gray-500 dark:text-gray-400">No hay envíos KYC registrados.</p>
                         </div>
 
@@ -243,12 +275,18 @@ const eliminarRegistro = (kycId) => {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="kyc in kycSends" :key="kyc.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
-                                            {{ kyc.name_client }} {{ kyc.lastname_client }}
+                                    <tr v-for="kyc in kycSends.data" :key="kyc.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300"
+                                            :title="getNombreCompleto(kyc)"
+                                        >
+                                            {{ truncarTexto(getNombreCompleto(kyc)) }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300">
-                                            {{ kyc.email }}
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-secondary dark:text-gray-300"
+                                            :title="kyc.email"
+                                        >
+                                            {{ truncarTexto(kyc.email) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
@@ -293,6 +331,46 @@ const eliminarRegistro = (kycId) => {
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Paginación -->
+                        <div v-if="kycSends.data && kycSends.data.length > 0" class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <label for="page_size" class="text-sm text-secondary dark:text-white">Registros por página:</label>
+                                <select
+                                    id="page_size"
+                                    v-model="pageSize"
+                                    @change="cambiarPageSize(pageSize)"
+                                    class="px-6 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm"
+                                >
+                                    <option value="10">10</option>
+                                    <option value="30">30</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button
+                                    @click="cambiarPagina(kycSends.current_page - 1)"
+                                    :disabled="kycSends.current_page <= 1"
+                                    class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Anterior
+                                </button>
+
+                                <span class="px-4 py-2 text-sm text-secondary dark:text-white">
+                                    Página {{ kycSends.current_page }} de {{ kycSends.last_page }}
+                                </span>
+
+                                <button
+                                    @click="cambiarPagina(kycSends.current_page + 1)"
+                                    :disabled="kycSends.current_page >= kycSends.last_page"
+                                    class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Siguiente
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
