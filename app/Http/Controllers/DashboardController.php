@@ -58,6 +58,7 @@ class DashboardController extends Controller
 
         // Colaboradores activos para el dropdown del filtro
         $colaboradores = User::where('role', 'colaborador')
+            ->where('activo', true)
             ->orderBy('name')
             ->get(['id', 'name']);
 

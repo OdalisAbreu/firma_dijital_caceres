@@ -64,6 +64,9 @@ const deleteUser = (userId) => {
                                             Rol
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                            Estado
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Fecha de Registro
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
@@ -91,6 +94,17 @@ const deleteUser = (userId) => {
                                                 }"
                                             >
                                                 {{ user.role === 'administrador' ? 'Administrador' : 'Colaborador' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span
+                                                :class="{
+                                                    'px-2 py-1 text-xs font-semibold rounded-full': true,
+                                                    'bg-green-100 text-green-800': user.activo,
+                                                    'bg-red-100 text-red-800': !user.activo
+                                                }"
+                                            >
+                                                {{ user.activo ? 'Activo' : 'Inactivo' }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-accent">

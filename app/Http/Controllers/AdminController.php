@@ -43,6 +43,7 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:administrador,colaborador',
+            'activo' => 'boolean',
         ]);
 
         User::create([
@@ -50,6 +51,7 @@ class AdminController extends Controller
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
+            'activo' => $validated['activo'] ?? true,
         ]);
 
         return redirect()->route('admin.index')->with('success', 'Usuario creado exitosamente.');
@@ -75,12 +77,14 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|in:administrador,colaborador',
+            'activo' => 'boolean',
         ]);
 
         $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'activo' => $validated['activo'] ?? false,
         ];
 
         if ($validated['password']) {

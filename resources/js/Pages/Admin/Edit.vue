@@ -20,6 +20,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     role: props.user.role || 'colaborador',
+    activo: props.user.activo ?? true,
 });
 
 const submit = () => {
@@ -114,6 +115,19 @@ const submit = () => {
                                     <option value="colaborador">Colaborador</option>
                                 </select>
                                 <InputError class="mt-2" :message="form.errors.role" />
+                            </div>
+
+                            <div class="mt-4 flex items-center">
+                                <input
+                                    id="activo"
+                                    type="checkbox"
+                                    v-model="form.activo"
+                                    class="rounded border-gray-300 text-primary shadow-sm focus:ring focus:ring-primary focus:ring-opacity-50"
+                                />
+                                <label for="activo" class="ml-2 text-sm text-secondary">
+                                    Usuario activo
+                                </label>
+                                <InputError class="mt-2" :message="form.errors.activo" />
                             </div>
 
                             <div class="flex items-center justify-end mt-4">
