@@ -1,17 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { useDarkMode } from '@/composables/useDarkMode';
 
 const showingNavigationDropdown = ref(false);
 const { isDark, toggleDarkMode } = useDarkMode();
 const isLoading = ref(false);
+const page = usePage();
+const logoUrl = computed(() => page.props.siteSettings?.logo_url);
 
 onMounted(() => {
     router.on('start', () => {
@@ -55,7 +57,14 @@ onMounted(() => {
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
                                 <Link :href="route('dashboard')">
+                                    <img
+                                        v-if="logoUrl"
+                                        :src="logoUrl"
+                                        alt="Logo"
+                                        class="block h-9 w-auto object-contain"
+                                    />
                                     <ApplicationLogo
+                                        v-else
                                         class="block h-9 w-auto fill-current text-white"
                                     />
                                 </Link>
@@ -124,7 +133,7 @@ onMounted(() => {
                                                 type="button"
                                                 :class="[
                                                     'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none',
-                                                    route().current('admin.*') || route().current('employees.*')
+                                                    route().current('admin.*') || route().current('employees.*') || route().current('settings.*')
                                                         ? 'border-primary text-white focus:border-primary-light'
                                                         : 'border-transparent text-accent hover:text-white hover:border-accent-light focus:text-white focus:border-accent-light'
                                                 ]"
@@ -151,6 +160,9 @@ onMounted(() => {
                                             </DropdownLink>
                                             <DropdownLink :href="route('employees.index')" :active="route().current('employees.*')">
                                                 Empleados
+                                            </DropdownLink>
+                                            <DropdownLink :href="route('settings.visuales.edit')" :active="route().current('settings.*')">
+                                                Visuales
                                             </DropdownLink>
                                         </template>
                                     </Dropdown>
@@ -352,6 +364,9 @@ onMounted(() => {
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('employees.index')" :active="route().current('employees.*')">
                                     Empleados
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('settings.visuales.edit')" :active="route().current('settings.*')">
+                                    Visuales
                                 </ResponsiveNavLink>
                             </div>
                         </div>

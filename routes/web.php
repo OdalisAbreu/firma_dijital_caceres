@@ -77,6 +77,12 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{employee}', [EmployeeController::class, 'update'])->name('update');
         Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
     });
+
+    // Configuración Visual (logo, favicon, apple touch icon) - Solo para administradores
+    Route::middleware('admin')->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/visuales', [App\Http\Controllers\SiteSettingController::class, 'edit'])->name('visuales.edit');
+        Route::post('/visuales', [App\Http\Controllers\SiteSettingController::class, 'update'])->name('visuales.update');
+    });
 });
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,6 +30,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $siteSettings = SiteSetting::current();
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -38,6 +41,11 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
                 ] : null,
+            ],
+            'siteSettings' => [
+                'logo_url' => $siteSettings->logo_url,
+                'favicon_url' => $siteSettings->favicon_url,
+                'apple_touch_icon_url' => $siteSettings->apple_touch_icon_url,
             ],
         ];
     }

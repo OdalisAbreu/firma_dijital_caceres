@@ -1,8 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const logoUrl = computed(() => page.props.siteSettings?.logo_url);
 
 const isLoading = ref(false);
 
@@ -40,7 +43,8 @@ onMounted(() => {
         </Transition>
         <div>
             <Link href="/">
-                <ApplicationLogo class="w-20 h-20 fill-current text-white" />
+                <img v-if="logoUrl" :src="logoUrl" alt="Logo" class="w-20 h-20 object-contain" />
+                <ApplicationLogo v-else class="w-20 h-20 fill-current text-white" />
             </Link>
         </div>
 
