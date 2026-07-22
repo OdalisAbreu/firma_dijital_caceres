@@ -66,7 +66,7 @@ onMounted(() => {
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
-                                
+
                                 <!-- Envío Individual Dropdown -->
                                 <div class="relative -my-px">
                                     <Dropdown align="left" width="48">
@@ -103,15 +103,15 @@ onMounted(() => {
                                             <DropdownLink :href="route('clientes.personales.index')" :active="route().current('clientes.personales.*')">
                                                 Clientes Personales
                                             </DropdownLink>
-                                            <!-- <DropdownLink :href="route('clientes.corporativos.index')" :active="route().current('clientes.corporativos.*')">
+                                            <DropdownLink :href="route('clientes.corporativos.index')" :active="route().current('clientes.corporativos.*')">
                                                 Clientes Corporativos
-                                            </DropdownLink> -->
+                                            </DropdownLink>
                                             <DropdownLink :href="route('clientes.personales.kyc-vencidos')" :active="route().current('clientes.personales.kyc-vencidos')">
                                                 KYC Vencidos Personales
                                             </DropdownLink>
-                                            <!-- <DropdownLink :href="route('clientes.corporativos.kyc-vencidos')" :active="route().current('clientes.corporativos.kyc-vencidos')">
+                                            <DropdownLink :href="route('clientes.corporativos.kyc-vencidos')" :active="route().current('clientes.corporativos.kyc-vencidos')">
                                                 KYC Vencidos Corporativos
-                                            </DropdownLink> -->
+                                            </DropdownLink>
                                         </template>
                                     </Dropdown>
                                 </div>
@@ -320,7 +320,7 @@ onMounted(() => {
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
-                        
+
                         <!-- Envío Individual -->
                         <div class="px-4 py-2">
                             <div class="font-medium text-base text-white mb-2">Envío Individual</div>
@@ -342,7 +342,7 @@ onMounted(() => {
                                 </ResponsiveNavLink>
                             </div>
                         </div>
-                        
+
                         <!-- Configuración - Solo para administradores -->
                         <div v-if="$page.props.auth.user?.role === 'administrador'" class="px-4 py-2">
                             <div class="font-medium text-base text-white mb-2">Configuración</div>

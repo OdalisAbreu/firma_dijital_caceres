@@ -32,7 +32,7 @@ const props = defineProps({
 
 const form = useForm({
     cnomcliente: props.filters.cnomcliente || '',
-    estado_formulario: props.filters.estado_formulario || 'VENCIDO (NO REMITIDO)',
+    estado_formulario: props.filters.estado_formulario || 'VENCIDO',
     page: 1,
     page_size: 10,
 });

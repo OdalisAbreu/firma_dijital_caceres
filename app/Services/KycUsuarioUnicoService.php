@@ -111,7 +111,7 @@ class KycUsuarioUnicoService
 
         $tipo_formulario = $data['tipodepersona'] == 'fisica'
             ? ($idioma === 'en' ? 'formulario_conocimiento_persona_fisica_ing' : 'formulario_conocimiento_persona_fisica_esp')
-            : ($idioma === 'en' ? 'formulario_conocimiento_persona_juridica_ing' : 'formulario_conocimiento_persona_juridica_esp');
+            : ($idioma === 'en' ? 'formulario_conocimiento_persona_juridica_ing' : 'formulario_conocimiento_persona_juridica');
         // Valores por defecto
         $title = $data['title'] ?? 'Formulario KYC';
         $description = $data['description'] ?? 'Documento para firma electrónica';

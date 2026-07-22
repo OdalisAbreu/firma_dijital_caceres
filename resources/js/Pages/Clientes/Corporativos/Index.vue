@@ -99,7 +99,7 @@ const limpiarFiltros = () => {
 
 const cambiarPagina = (page) => {
     form.page = page;
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.index'), {
         preserveState: true,
         preserveScroll: true,
     });
@@ -108,7 +108,7 @@ const cambiarPagina = (page) => {
 const cambiarPageSize = (newSize) => {
     form.page_size = newSize;
     form.page = 1; // Resetear a la primera página
-    form.get(route('clientes.index'), {
+    form.get(route('clientes.corporativos.index'), {
         preserveState: true,
         preserveScroll: true,
     });

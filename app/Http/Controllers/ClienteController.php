@@ -403,6 +403,7 @@ class ClienteController extends Controller
         $filters = [
             'page' => $request->get('page', 1),
             'page_size' => $request->get('page_size', 10),
+            'estado_formulario' => 'VENCIDO',
         ];
 
         // Agregar filtros opcionales solo si están presentes
