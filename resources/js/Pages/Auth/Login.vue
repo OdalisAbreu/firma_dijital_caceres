@@ -77,13 +77,13 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-end mt-4">
-                <Link
+               <!-- <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
                     class="underline text-sm text-secondary hover:text-primary rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 >
                     ¿Olvidaste tu contraseña?
-                </Link>
+                </Link> -->
 
                 <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                     Iniciar Sesión
