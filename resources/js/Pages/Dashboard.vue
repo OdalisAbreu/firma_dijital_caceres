@@ -26,6 +26,10 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    colaboradores: {
+        type: Array,
+        default: () => [],
+    },
     filters: {
         type: Object,
         default: () => ({}),
@@ -33,11 +37,12 @@ const props = defineProps({
 });
 
 const pageSize = ref(props.filters?.page_size || 10);
+const colaboradorId = ref(props.filters?.colaborador_id || '');
 
 const cambiarPagina = (page) => {
     router.get(
         route('dashboard'),
-        { page, page_size: pageSize.value },
+        { page, page_size: pageSize.value, colaborador_id: colaboradorId.value || undefined },
         { preserveState: true, preserveScroll: true }
     );
 };
@@ -46,7 +51,24 @@ const cambiarPageSize = (newSize) => {
     pageSize.value = newSize;
     router.get(
         route('dashboard'),
-        { page: 1, page_size: newSize },
+        { page: 1, page_size: newSize, colaborador_id: colaboradorId.value || undefined },
+        { preserveState: true, preserveScroll: true }
+    );
+};
+
+const aplicarFiltroColaborador = () => {
+    router.get(
+        route('dashboard'),
+        { page: 1, page_size: pageSize.value, colaborador_id: colaboradorId.value || undefined },
+        { preserveState: true, preserveScroll: true }
+    );
+};
+
+const limpiarFiltroColaborador = () => {
+    colaboradorId.value = '';
+    router.get(
+        route('dashboard'),
+        { page: 1, page_size: pageSize.value },
         { preserveState: true, preserveScroll: true }
     );
 };
@@ -139,6 +161,40 @@ const eliminarRegistro = (kycId) => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Filtro por Colaborador -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+                            <div class="flex-1 max-w-xs">
+                                <label for="colaborador_id" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                    Filtrar por Colaborador
+                                </label>
+                                <select
+                                    id="colaborador_id"
+                                    v-model="colaboradorId"
+                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 bg-white"
+                                >
+                                    <option value="">Todos los colaboradores</option>
+                                    <option v-for="colaborador in colaboradores" :key="colaborador.id" :value="colaborador.id">
+                                        {{ colaborador.name }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <PrimaryButton @click="aplicarFiltroColaborador">
+                                    Filtrar
+                                </PrimaryButton>
+                                <button
+                                    @click="limpiarFiltroColaborador"
+                                    class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                >
+                                    Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Estadísticas -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                          <!-- Total Respondidos por Clientes -->

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KycSend;
+use App\Models\User;
 use App\Services\KycUsuarioUnicoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,20 +21,28 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        // Calcular estadísticas sobre el total de registros (no solo la página actual)
-        $totalKyc = KycSend::count();
+        $colaboradorId = $request->get('colaborador_id');
+
+        // Filtro base aplicado a las estadísticas y a la tabla
+        $baseQuery = KycSend::query();
+        if ($colaboradorId) {
+            $baseQuery->where('user_id', $colaboradorId);
+        }
+
+        // Calcular estadísticas sobre el total de registros filtrados (no solo la página actual)
+        $totalKyc = (clone $baseQuery)->count();
 
         // Considerar completados aquellos con status RESPONSED
-        $totalCompletados = KycSend::whereRaw('UPPER(kyc_status) = ?', ['RESPONSED'])->count();
+        $totalCompletados = (clone $baseQuery)->whereRaw('UPPER(kyc_status) = ?', ['RESPONSED'])->count();
 
         // El resto son pendientes
         $totalPendientes = $totalKyc - $totalCompletados;
 
         // Total de KYC Respondidos por clientes (status_firmante01 = RESPONSED)
-        $totalRespondidosClientes = KycSend::whereRaw('UPPER(status_firmante01) = ?', ['RESPONSED'])->count();
+        $totalRespondidosClientes = (clone $baseQuery)->whereRaw('UPPER(status_firmante01) = ?', ['RESPONSED'])->count();
 
         // Total de KYC Respondidos por colaborador (status_firmante02 = RESPONSED)
-        $totalRespondidosColaborador = KycSend::whereRaw('UPPER(status_firmante02) = ?', ['RESPONSED'])->count();
+        $totalRespondidosColaborador = (clone $baseQuery)->whereRaw('UPPER(status_firmante02) = ?', ['RESPONSED'])->count();
 
         // Paginación de la tabla
         $pageSize = (int) $request->get('page_size', 10);
@@ -41,10 +50,16 @@ class DashboardController extends Controller
             $pageSize = 10;
         }
 
-        $kycSends = KycSend::with('user')
+        $kycSends = (clone $baseQuery)
+            ->with('user')
             ->latest()
             ->paginate($pageSize)
             ->withQueryString();
+
+        // Colaboradores activos para el dropdown del filtro
+        $colaboradores = User::where('role', 'colaborador')
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         return Inertia::render('Dashboard', [
             'kycSends' => $kycSends,
@@ -52,8 +67,10 @@ class DashboardController extends Controller
             'totalPendientes' => $totalPendientes,
             'totalRespondidosClientes' => $totalRespondidosClientes,
             'totalRespondidosColaborador' => $totalRespondidosColaborador,
+            'colaboradores' => $colaboradores,
             'filters' => [
                 'page_size' => $pageSize,
+                'colaborador_id' => $colaboradorId ? (int) $colaboradorId : null,
             ],
         ]);
     }
