@@ -81,10 +81,10 @@ class DashboardController extends Controller
      */
     public function actualizarEstados(Request $request)
     {
-        // Obtener todos los KYC que no están en estado RESPONSED ni EXPIRED y tienen tracking_code
+        // Obtener todos los KYC que no están en estado RESPONSED, EXPIRED ni REJECTED y tienen tracking_code
         $kycSends = KycSend::whereNotNull('tracking_code')
             ->where(function ($query) {
-                $query->whereNotIn('kyc_status', ['RESPONSED', 'EXPIRED'])
+                $query->whereNotIn('kyc_status', ['RESPONSED', 'EXPIRED', 'REJECTED'])
                     ->orWhereNull('kyc_status');
             })
             ->get();

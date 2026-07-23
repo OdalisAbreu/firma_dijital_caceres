@@ -168,6 +168,8 @@ const mostrarCampoNumero = computed(() => {
     return form.tipo_identificacion !== '';
 });
 
+const esPersonaJuridica = computed(() => form.tipo_persona === 'juridica');
+
 const getPlaceholderIdentificacion = () => {
     const tipo = form.tipo_identificacion;
     if (tipo === 'Cédula') return 'Ingrese el número de cédula';
@@ -289,7 +291,7 @@ const submit = () => {
                                 </div>
                                 <!-- Nombre Cliente -->
                                 <div>
-                                    <InputLabel for="name_client" value="Nombre del Cliente *" />
+                                    <InputLabel for="name_client" :value="esPersonaJuridica ? 'Nombre *' : 'Nombre del Cliente *'" />
                                     <TextInput
                                         id="name_client"
                                         type="text"
@@ -301,7 +303,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Apellido Cliente -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                     <InputLabel for="lastname_client" value="Apellido del Cliente *" />
                                     <TextInput
                                         id="lastname_client"
@@ -413,7 +415,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Sexo * -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="sexo" value="Sexo" />
                                 <select
                                     id="sexo"
@@ -429,7 +431,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Fecha de Nacimiento * -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="fechanacimiento" value="Fecha de Nacimiento" />
                                 <input
                                     id="fechanacimiento"
@@ -442,7 +444,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Ciudad de Nacimiento -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="ciudaddenacimiento" value="Ciudad de Nacimiento" />
                                 <TextInput
                                     id="ciudaddenacimiento"
@@ -454,7 +456,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Provincia de Nacimiento -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="provinciadenacimiento" value="Provincia de Nacimiento" />
                                 <TextInput
                                     id="provinciadenacimiento"
@@ -478,7 +480,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Profesión * -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="profesion" value="Profesión" />
                                 <TextInput
                                     id="profesion"
@@ -491,7 +493,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Ocupación/Cargo * -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="ocupacioncargo" value="Ocupación/Cargo" />
                                 <TextInput
                                     id="ocupacioncargo"
@@ -504,7 +506,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Empresa * -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="empresa" value="Empresa" />
                                 <TextInput
                                     id="empresa"
@@ -567,7 +569,7 @@ const submit = () => {
                                 </div>
 
                                 <!-- Ciudad Residencia -->
-                                <div>
+                                <div v-if="!esPersonaJuridica">
                                 <InputLabel for="ciudadresidencia" value="Ciudad Residencia" />
                                 <TextInput
                                     id="ciudadresidencia"

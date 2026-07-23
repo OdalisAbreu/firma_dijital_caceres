@@ -422,6 +422,8 @@ const getEstatusClass = (estatus) => {
 const getNombreCompleto = (cliente) => {
     return `${cliente.nombre} ${cliente.apellido}`.trim();
 };
+
+const esPersonaJuridica = computed(() => kycForm.tipo_persona === 'juridica');
 </script>
 
 <template>
@@ -908,7 +910,7 @@ const getNombreCompleto = (cliente) => {
 
                                     <!-- Nombres * -->
                                     <div>
-                                        <InputLabel for="name_client" value="Nombres *" />
+                                        <InputLabel for="name_client" :value="esPersonaJuridica ? 'Nombre *' : 'Nombres *'" />
                                         <TextInput
                                             id="name_client"
                                             type="text"
@@ -920,7 +922,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Apellidos * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="lastname_client" value="Apellidos *" />
                                         <TextInput
                                             id="lastname_client"
@@ -933,7 +935,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Sexo * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="sexo" value="Sexo *" />
                                         <select
                                             id="sexo"
@@ -949,19 +951,19 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Fecha de Nacimiento * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="fechanacimiento" value="Fecha de Nacimiento" />
                                         <input
                                             id="fechanacimiento"
                                             type="date"
                                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                            v-model="fechanacimientoDate"                                            
+                                            v-model="fechanacimientoDate"
                                         />
                                         <span v-if="kycForm.errors.fechanacimiento" class="text-red-600 text-sm">{{ kycForm.errors.fechanacimiento }}</span>
                                     </div>
 
                                     <!-- Ciudad de Nacimiento -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="ciudaddenacimiento" value="Ciudad de Nacimiento" />
                                         <TextInput
                                             id="ciudaddenacimiento"
@@ -972,7 +974,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Provincia de Nacimiento -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="provinciadenacimiento" value="Provincia de Nacimiento" />
                                         <TextInput
                                             id="provinciadenacimiento"
@@ -994,7 +996,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Profesión * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="profesion" value="Profesión" />
                                         <TextInput
                                             id="profesion"
@@ -1006,7 +1008,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Ocupación/Cargo * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="ocupacioncargo" value="Ocupación/Cargo" />
                                         <TextInput
                                             id="ocupacioncargo"
@@ -1018,7 +1020,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Empresa * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="empresa" value="Empresa" />
                                         <TextInput
                                             id="empresa"
@@ -1077,7 +1079,7 @@ const getNombreCompleto = (cliente) => {
                                     </div>
 
                                     <!-- Ciudad Residencia -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="ciudadresidencia" value="Ciudad Residencia" />
                                         <TextInput
                                             id="ciudadresidencia"

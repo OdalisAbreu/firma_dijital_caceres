@@ -89,7 +89,7 @@ class ClienteController extends Controller
         $validated = $request->validate([
             'tipo_persona' => 'required|in:fisica,juridica',
             'name_client' => 'required|string|max:255',
-            'lastname_client' => 'required|string|max:255',
+            'lastname_client' => 'nullable|required_if:tipo_persona,fisica|string|max:255',
             'email_client' => 'required|email|max:255',
             'tipo_tercero' => 'required|in:Tomador,Asegurado,Beneficiario,Afianzado,Proveedor,Empleado,Apoderado',
             'sucursal' => 'required|in:Principal,Romana,Punta Cana',
@@ -106,7 +106,7 @@ class ClienteController extends Controller
 
         // Preparar todos los datos para el servicio
         $data = [
-            'title' => 'Formulario KYC - ' . $validated['name_client'] . ' ' . $validated['lastname_client'],
+            'title' => 'Formulario KYC - ' . trim($validated['name_client'] . ' ' . ($validated['lastname_client'] ?? '')),
             'description' => 'Documento para firma electrónica',
             'tipodepersona' => $validated['tipo_persona'],
             'idioma' => $request->idioma,

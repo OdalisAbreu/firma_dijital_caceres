@@ -412,6 +412,8 @@ const cerrarModal = () => {
     kycForm.reset();
 };
 
+const esPersonaJuridica = computed(() => kycForm.tipo_persona === 'juridica');
+
 const submitKyc = () => {
     // Si seleccionó "Otro" en actividad económica, usar el campo otroactividadeconomica
     if (kycForm.informacionactividadeconomica === 'Otro' && kycForm.otroactividadeconomica) {
@@ -893,7 +895,7 @@ const submitKyc = () => {
 
                                     <!-- Nombres * -->
                                     <div>
-                                        <InputLabel for="name_client" value="Nombres *" />
+                                        <InputLabel for="name_client" :value="esPersonaJuridica ? 'Nombre *' : 'Nombres *'" />
                                         <TextInput
                                             id="name_client"
                                             type="text"
@@ -905,7 +907,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Apellidos * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="lastname_client" value="Apellidos *" />
                                         <TextInput
                                             id="lastname_client"
@@ -918,7 +920,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Sexo * -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="sexo" value="Sexo *" />
                                         <select
                                             id="sexo"
@@ -934,7 +936,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Fecha de Nacimiento -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="fechanacimiento" value="Fecha de Nacimiento" />
                                         <input
                                             id="fechanacimiento"
@@ -946,7 +948,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Ciudad de Nacimiento -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="ciudaddenacimiento" value="Ciudad de Nacimiento" />
                                         <TextInput
                                             id="ciudaddenacimiento"
@@ -957,7 +959,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Provincia de Nacimiento -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="provinciadenacimiento" value="Provincia de Nacimiento" />
                                         <TextInput
                                             id="provinciadenacimiento"
@@ -979,7 +981,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Profesión -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="profesion" value="Profesión" />
                                         <TextInput
                                             id="profesion"
@@ -991,7 +993,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Ocupación/Cargo -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="ocupacioncargo" value="Ocupación/Cargo" />
                                         <TextInput
                                             id="ocupacioncargo"
@@ -1003,7 +1005,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Empresa -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="empresa" value="Empresa" />
                                         <TextInput
                                             id="empresa"
@@ -1061,7 +1063,7 @@ const submitKyc = () => {
                                     </div>
 
                                     <!-- Ciudad Residencia -->
-                                    <div>
+                                    <div v-if="!esPersonaJuridica">
                                         <InputLabel for="ciudadresidencia" value="Ciudad Residencia" />
                                         <TextInput
                                             id="ciudadresidencia"

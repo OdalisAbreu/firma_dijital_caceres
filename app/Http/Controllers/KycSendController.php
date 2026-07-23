@@ -38,7 +38,7 @@ class KycSendController extends Controller
             'redirect_to' => 'nullable|string',
             'redirect_query' => 'nullable|array',
             'name_client' => 'required|string|max:255',
-            'lastname_client' => 'required|string|max:255',
+            'lastname_client' => 'nullable|required_if:tipo_persona,fisica|string|max:255',
             'email_client' => 'required|email|max:255',
             'tipo_identificacion' => 'required|in:Cédula,RNC,Pasaporte',
             'numero_identificacion' => 'required|string|max:255',
@@ -84,7 +84,7 @@ class KycSendController extends Controller
 
         // Preparar datos para el servicio
         $kycData = [
-            'title' => $validated['title'] ?? 'Formulario KYC - ' . $validated['name_client'] . ' ' . $validated['lastname_client'],
+            'title' => $validated['title'] ?? 'Formulario KYC - ' . trim($validated['name_client'] . ' ' . ($validated['lastname_client'] ?? '')),
             'description' => $validated['description'] ?? 'Documento para firma electrónica',
             'tipodepersona' => $validated['tipo_persona'],
             'idioma' => $validated['idioma'] ?? 'es',

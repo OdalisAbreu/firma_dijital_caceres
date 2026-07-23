@@ -266,7 +266,7 @@ class KycUsuarioUnicoService
                             ],
                         ],
                     ],
-                    'metadataList' => $this->construirMetadataList($data, $tipoIdentificacion, $numeroIdentificacion, $name, $lastname, $emailClient, $codeEmployee, $tipoTercero, $sucursal),
+                    'metadataList' => $this->construirMetadataList($data, $tipoIdentificacion, $numeroIdentificacion, $name, $lastname, $emailClient, $codeEmployee, $tipoTercero, $sucursal, (string) ($data['tipodepersona'] ?? 'fisica')),
                 ],
             ],
         ];
@@ -275,10 +275,11 @@ class KycUsuarioUnicoService
     /**
      * Construye la lista de metadata para el payload
      */
-    protected function construirMetadataList(array $data, string $tipoIdentificacion, string $numeroIdentificacion, string $name, string $lastname, string $emailClient, string $codeEmployee, string $tipoTercero, string $sucursal): array
+    protected function construirMetadataList(array $data, string $tipoIdentificacion, string $numeroIdentificacion, string $name, string $lastname, string $emailClient, string $codeEmployee, string $tipoTercero, string $sucursal, string $tipoPersona = 'fisica'): array
     {
         $metadataList = [];
         $dateFields = ['fechadevencimiento', 'fechanacimiento', 'fecha'];
+        $esJuridica = $tipoPersona === 'juridica';
 
         if (!isset($data['provinciaresidencia']) && isset($data['provinciaresidencia'])) {
             $data['provinciaresidencia'] = $data['provinciaresidencia'];
@@ -286,8 +287,14 @@ class KycUsuarioUnicoService
 
         // Campos obligatorios o con valores por defecto
         $metadataList[] = ['key' => 'tipodeidentificacion', 'value' => $tipoIdentificacion];
-        $metadataList[] = ['key' => 'numero', 'value' => $numeroIdentificacion];
-        $metadataList[] = ['key' => 'nombreyapellidos', 'value' => trim("{$name} {$lastname}")];
+        $metadataList[] = ['key' => $esJuridica ? 'rnc' : 'numero', 'value' => $numeroIdentificacion];
+
+        if ($esJuridica) {
+            $metadataList[] = ['key' => 'nombrecomercial', 'value' => $name];
+        } else {
+            $metadataList[] = ['key' => 'nombreyapellidos', 'value' => trim("{$name} {$lastname}")];
+        }
+
         $metadataList[] = ['key' => 'correoelectronico', 'value' => $emailClient];
         $metadataList[] = ['key' => 'codigodelempleado', 'value' => $codeEmployee];
         $metadataList[] = ['key' => 'tipodetercero', 'value' => $tipoTercero];
@@ -329,7 +336,22 @@ class KycUsuarioUnicoService
             'fecha',
         ];
 
+        // Campos que no aplican cuando el tipo de persona es jurídica
+        $camposExcluidosJuridica = [
+            'sexo',
+            'fechanacimiento',
+            'ciudaddenacimiento',
+            'provinciadenacimiento',
+            'profesion',
+            'ocupacioncargo',
+            'empresa',
+            'ciudadresidencia',
+        ];
+
         foreach ($optionalFields as $field) {
+            if ($esJuridica && in_array($field, $camposExcluidosJuridica, true)) {
+                continue;
+            }
             if (isset($data[$field]) && $data[$field] !== null && $data[$field] !== '') {
                 $value = $data[$field];
                 if (in_array($field, $dateFields, true)) {
